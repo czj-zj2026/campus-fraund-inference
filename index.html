@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html lang='zh-CN'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no'>
+<meta name='theme-color' content='#0a0f14'>
+<meta name='apple-mobile-web-app-capable' content='yes'>
+<title>骗局溯源 · 反诈推理师</title>
+<link rel='stylesheet' href='styles.css'>
+</head>
+<body>
+<div class='ambient-grid' aria-hidden='true'></div>
+<div class='app-shell' id='app'>
+  <div class='fx-layer' id='fxLayer' aria-hidden='true'></div>
+
+  <section class='screen is-active' id='homeScreen'>
+    <header class='topbar home-topbar'>
+      <div class='brand-lockup'>
+        <div class='brand-mark'><span>FT</span><i></i></div>
+        <div><b>FRAUD TRACE</b><small>骗局溯源 · 反诈推理师</small></div>
+      </div>
+      <button class='round-btn' id='soundBtn' type='button' aria-label='切换音效'><span id='soundIcon'>◉</span></button>
+    </header>
+
+    <main class='home-main'>
+      <div class='intro-row'>
+        <div><p class='hud-label'>CAMPUS CASE UNIT / 校园案件组</p><h1>今天，<br><span>识破谁？</span></h1></div>
+        <div class='status-orbit' aria-hidden='true'><div class='orbit-ring'></div><div class='orbit-ring ring-2'></div><span>AI</span><small>研判中</small></div>
+      </div>
+
+      <section class='feature-card' id='featureCard' aria-label='今日推荐案件'>
+        <div class='scan-sheen'></div>
+        <div class='feature-top'><span class='live-tag'><i></i>今日推荐</span><span class='feature-code' id='featureCode'>CASE 002</span></div>
+        <div class='feature-body'>
+          <div class='feature-icon' id='featureIcon'>💸</div>
+          <div class='feature-copy'><p id='featureScene'>兼职刷单 · 高风险</p><h2 id='featureTitle'>日赚300的刷单兼职</h2><span id='featureHook'>先垫98，做完连本带利返</span></div>
+        </div>
+        <div class='feature-meta'>
+          <div><span>破绽</span><strong id='featureFlaws'>6</strong></div>
+          <div><span>难度</span><strong id='featureDifficulty'>入门</strong></div>
+          <div><span>用时</span><strong id='featureTime'>≈2 min</strong></div>
+        </div>
+        <button class='primary-btn feature-btn' id='featureStart' type='button'>进入案件<span>→</span></button>
+      </section>
+      <div class='quick-grid'>
+        <button class='quick-card scan-quick' id='scanQuick' type='button'><span class='quick-icon'>⌁</span><span><b>截图研判</b><small>可疑聊天，快速筛查</small></span><i>→</i></button>
+        <button class='quick-card' id='profileQuick' type='button'><span class='quick-icon'>◈</span><span><b>能力画像</b><small>看见你的防骗盲区</small></span><i>→</i></button>
+      </div>
+      <section class='case-section'>
+        <div class='section-head'><div><p class='hud-label'>CASE FILES</p><h2>案件档案</h2></div><button class='text-btn' id='viewAllBtn' type='button'>查看全部 <span>08</span></button></div>
+        <div class='case-strip' id='homeCaseList'></div>
+      </section>
+      <div class='safety-tip'><span class='tip-radar'><i></i></span><div><b>96110</b><p>接到反诈预警电话，请立即接听。已经转账，第一时间拨打 110。</p></div></div>
+    </main>
+    <nav class='bottom-nav' aria-label='主导航'>
+      <button class='nav-item is-active' data-nav='home' type='button'><span>⌂</span><b>首页</b></button>
+      <button class='nav-item' data-nav='library' type='button'><span>▤</span><b>案件</b></button>
+      <button class='nav-item' data-nav='profile' type='button'><span>◈</span><b>能力</b></button>
+    </nav>
+  </section>
+
+  <section class='screen' id='libraryScreen'>
+    <header class='topbar'>
+      <button class='round-btn back-btn' data-back='home' type='button' aria-label='返回'>←</button>
+      <div class='page-title'><p class='hud-label'>CASE ARCHIVE</p><h2>案件档案库</h2></div>
+      <div class='archive-count'><strong id='archiveCount'>08</strong><span>案例</span></div>
+    </header>
+    <main class='archive-main'>
+      <div class='filter-scroll' id='filterBar'></div>
+      <div class='case-grid' id='caseGrid'></div>
+      <div class='archive-footer'><span>所有案例均已脱敏改编</span><b>DATA / LOCAL</b></div>
+    </main>
+    <nav class='bottom-nav' aria-label='主导航'>
+      <button class='nav-item' data-nav='home' type='button'><span>⌂</span><b>首页</b></button>
+      <button class='nav-item is-active' data-nav='library' type='button'><span>▤</span><b>案件</b></button>
+      <button class='nav-item' data-nav='profile' type='button'><span>◈</span><b>能力</b></button>
+    </nav>
+  </section>
+
+  <section class='screen' id='briefScreen'>
+    <header class='topbar'>
+      <button class='round-btn' id='briefBack' type='button' aria-label='返回'>←</button>
+      <div class='page-title'><p class='hud-label'>CASE BRIEF</p><h2>案件简报</h2></div>
+      <div class='topbar-spacer'></div>
+    </header>
+    <main class='brief-main'>
+      <article class='dossier-cover'>
+        <div class='dossier-pin'></div>
+        <div class='dossier-top'><span id='briefCode'>CASE 001</span><span id='briefThreat'>中高风险</span></div>
+        <div class='dossier-emblem' id='briefIcon'>📱</div>
+        <p class='dossier-en' id='briefEn'>THE TOO-GOOD PHONE</p>
+        <h1 id='briefTitle'>低价的“99新”手机</h1>
+        <div class='dossier-tags'><span id='briefScene'>二手交易</span><span id='briefDifficulty'>入门</span><span id='briefTime'>≈2 MIN</span></div>
+        <div class='red-stamp' id='briefStamp'>待侦破</div>
+      </article>
+      <section class='brief-block'><p class='hud-label'>BACKGROUND / 案件背景</p><p id='briefBackground'></p></section>
+      <section class='brief-block objective-block'><p class='hud-label'>MISSION / 侦破任务</p><p id='briefObjective'></p><div class='mission-stats'><div><b id='briefFlawCount'>6</b><span>处破绽</span></div><div><b id='briefCredit'>100</b><span>初始可信度</span></div></div></section>
+      <section class='howto-card'><div class='howto-title'><span>?</span><b>怎么玩</b></div><div class='howto-steps'><div><i>01</i><p>点击聊天里可疑的字句</p></div><div><i>02</i><p>锁定破绽，避开误判</p></div><div><i>03</i><p>提交后查看完整骗术链路</p></div></div></section>
+      <button class='primary-btn big-btn' id='startCaseBtn' type='button'>开始勘察<span>→</span></button>
+    </main>
+  </section>
+  <section class='screen game-screen' id='gameScreen'>
+    <header class='game-topbar'>
+      <button class='round-btn' id='gameExit' type='button' aria-label='退出案件'>←</button>
+      <div class='game-title-wrap'><p id='gameCaseCode'>CASE 001</p><h2 id='gameCaseTitle'>低价手机</h2></div>
+      <div class='timer-box'><span>TIME</span><strong id='timerValue'>00:00</strong></div>
+    </header>
+    <main class='game-main'>
+      <div class='evidence-status'><div class='evidence-copy'><span>已锁定证据</span><strong><b id='evidenceCount'>0</b> / <i id='evidenceTotal'>6</i></strong></div><div class='evidence-track'><div id='evidenceBar'></div></div></div>
+      <div class='case-context' id='gameContext'></div>
+      <div class='transcript-head'><span>聊天记录</span><b id='transcriptTime'>今天 20:14</b></div>
+      <div class='transcript' id='transcript'></div>
+      <div class='hint-banner' id='hintBanner'><span>⌁</span><p id='hintText'></p><button id='hintClose' type='button'>×</button></div>
+      <div class='game-dock'><button class='dock-btn hint-btn' id='hintBtn' type='button'><span>⌁</span><b>线索提示</b><small>-5 分</small></button><button class='dock-btn submit-btn' id='submitBtn' type='button'><span>✓</span><b>提交研判</b><small id='submitLabel'>还差 6 处</small></button></div>
+    </main>
+  </section>
+
+  <section class='screen' id='resultScreen'>
+    <header class='topbar'>
+      <button class='round-btn' id='resultBackHome' type='button' aria-label='返回首页'>←</button>
+      <div class='page-title'><p class='hud-label'>CASE REPORT</p><h2>研判结果</h2></div>
+      <button class='round-btn' id='resultShare' type='button' aria-label='分享'>↗</button>
+    </header>
+    <main class='result-main'>
+      <div class='result-hero'>
+        <p>CASE CLOSED</p>
+        <div class='grade-orbit' id='gradeOrbit'><div class='grade-ring'></div><div class='grade-letter' id='gradeLetter'>A</div><span class='grade-stamp' id='gradeStamp'>证据链完整</span></div>
+        <h1 id='gradeTitle'>敏锐的观察者</h1><p id='gradeSubtitle'>你抓住大部分关键破绽，继续保持核实习惯。</p>
+      </div>
+      <div class='result-stats'><div><span>命中</span><strong id='resultHits'>0</strong></div><div><span>误标</span><strong id='resultMisses'>0</strong></div><div><span>用时</span><strong id='resultTime'>00:00</strong></div><div><span>得分</span><strong id='resultScore'>0</strong></div></div>
+      <section class='chain-preview'><div class='section-head compact'><div><p class='hud-label'>FRAUD CHAIN</p><h2>骗术链路</h2></div><span id='chainSteps'>5 STEPS</span></div><div class='chain-flow' id='resultChain'></div></section>
+      <div class='result-actions'><button class='primary-btn' id='viewReportBtn' type='button'>查看完整复盘<span>→</span></button><button class='secondary-btn' id='nextCaseBtn' type='button'>进入下一案</button></div>
+    </main>
+  </section>
+  <section class='screen' id='reportScreen'>
+    <header class='topbar'>
+      <button class='round-btn' id='reportBack' type='button' aria-label='返回'>←</button>
+      <div class='page-title'><p class='hud-label'>DEBRIEF</p><h2>侦探复盘</h2></div>
+      <button class='round-btn' id='reportProfile' type='button' aria-label='能力画像'>◈</button>
+    </header>
+    <main class='report-main'>
+      <section class='report-case-head'><span id='reportCode'>CASE 001</span><h1 id='reportTitle'>低价手机</h1><p id='reportDebrief'></p></section>
+      <section class='report-section'><div class='section-head compact'><div><p class='hud-label'>TRACE MAP</p><h2>骗术链路还原</h2></div></div><div class='trace-map' id='traceMap'></div></section>
+      <section class='report-section'><div class='section-head compact'><div><p class='hud-label'>EVIDENCE LIST</p><h2>破绽逐条拆解</h2></div><span id='evidenceSummary'>0 / 0</span></div><div class='flaw-list' id='flawList'></div></section>
+      <div class='safety-tip report-safety'><span class='tip-radar'><i></i></span><div><b>反诈提醒</b><p>本作品用于风险识别训练，不保证百分百识别诈骗。遇到转账、验证码和屏幕共享要求，请立即停止。</p></div></div>
+      <div class='result-actions'><button class='primary-btn' id='reportNextBtn' type='button'>继续下一案<span>→</span></button></div>
+    </main>
+  </section>
+
+  <section class='screen' id='profileScreen'>
+    <header class='topbar'>
+      <button class='round-btn' id='profileBack' type='button' aria-label='返回'>←</button>
+      <div class='page-title'><p class='hud-label'>ABILITY PROFILE</p><h2>侦探能力画像</h2></div>
+      <button class='round-btn' id='profileReset' type='button' aria-label='重置记录'>↺</button>
+    </header>
+    <main class='profile-main' id='profileContent'></main>
+  </section>
+
+  <section class='screen scan-screen' id='scanScreen'>
+    <header class='topbar'>
+      <button class='round-btn' id='scanBack' type='button' aria-label='返回'>←</button>
+      <div class='page-title'><p class='hud-label'>RISK SCANNER</p><h2>截图研判室</h2></div>
+      <span class='beta-pill'>BETA</span>
+    </header>
+    <main class='scan-main'>
+      <section class='scanner-card'>
+        <div class='scanner-head'><span class='live-tag'><i></i>本地研判引擎</span><b>0.3s</b></div>
+        <label class='upload-zone' for='screenshotInput' id='uploadZone'>
+          <input id='screenshotInput' type='file' accept='image/*'>
+          <div class='upload-visual'><div class='scan-frame'><span></span><i></i></div><b>上传可疑截图</b><small>离线演示版：上传后请粘贴截图中的文字</small></div>
+          <img id='uploadPreview' alt='上传的截图预览' hidden>
+        </label>
+        <div class='paste-area'><label for='scanText'>可疑聊天文字</label><textarea id='scanText' rows='6' placeholder='把聊天内容粘贴到这里，例如：先转我200定金，马上给你发货……'></textarea><div class='paste-actions'><button class='text-btn' id='sampleScanBtn' type='button'>载入示例</button><span id='scanCharCount'>0 字</span></div></div>
+        <button class='primary-btn big-btn' id='analyzeBtn' type='button'>开始智能研判<span>⌁</span></button>
+      </section>
+      <section class='scan-result hidden' id='scanResult'>
+        <div class='risk-meter' id='riskMeter'><div class='risk-orbit'><strong id='riskScore'>0</strong><span>风险指数</span></div><div class='risk-copy'><p>RISK LEVEL</p><h2 id='riskLevel'>等待研判</h2><span id='riskSummary'></span></div></div>
+        <div class='scan-flaws' id='scanFlaws'></div>
+        <button class='secondary-btn' id='convertCaseBtn' type='button'>把这段聊天变成推理关</button>
+      </section>
+      <p class='scanner-note'>当前版本不上传图片到服务器，不保存聊天内容。真实 OCR 接口可在正式部署时接入。</p>
+    </main>
+  </section>
+
+  <div class='sheet-backdrop hidden' id='sheetBackdrop'><div class='bottom-sheet' id='feedbackSheet' role='dialog' aria-modal='true'><div class='sheet-handle'></div><div class='sheet-icon' id='sheetIcon'>!</div><h2 id='sheetTitle'>还没有命中</h2><p id='sheetCopy'></p><button class='primary-btn' id='sheetAction' type='button'>继续勘察</button></div></div>
+  <div class='modal-backdrop hidden' id='confirmModal'><div class='confirm-card' role='dialog' aria-modal='true'><span class='confirm-mark'>⌁</span><h2 id='confirmTitle'>确认提交？</h2><p id='confirmCopy'></p><div class='confirm-actions'><button class='secondary-btn' id='confirmCancel' type='button'>继续找</button><button class='primary-btn' id='confirmOk' type='button'>确认提交</button></div></div></div>
+  <div class='toast' id='toast' role='status' aria-live='polite'></div>
+</div>
+<script src='cases.js'></script>
+<script src='app.js'></script>
+</body>
+</html>
