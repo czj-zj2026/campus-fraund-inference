@@ -1,0 +1,1666 @@
+﻿<!DOCTYPE html>
+<html lang='zh-CN'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no'>
+<meta name='theme-color' content='#0a0f14'>
+<meta name='apple-mobile-web-app-capable' content='yes'>
+<title>骗局溯源 · 反诈推理师</title>
+<style>
+:root{
+  --bg:#080d12;--bg-soft:#0d141b;--surface:#111a22;--surface-2:#17232d;--surface-3:#1d2c38;
+  --line:rgba(214,231,242,.12);--line-strong:rgba(214,231,242,.22);
+  --text:#f4f0e7;--muted:#8b9aa6;--muted-2:#657581;--paper:#ede1ca;--ink:#11181f;
+  --amber:#f2b15d;--amber-2:#ffcb7c;--coral:#ff6b5f;--coral-2:#ff8f83;--mint:#65e5b2;--blue:#6bb9ee;
+  --sans:'Microsoft YaHei','PingFang SC','Noto Sans SC',sans-serif;
+  --serif:'Noto Serif SC','Songti SC','SimSun',serif;
+  --shadow:0 30px 80px rgba(0,0,0,.52);--r:22px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans)}
+body{min-height:100svh;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:16px}
+button{font:inherit;color:inherit}
+button,input,textarea{outline:none}
+button:focus-visible,textarea:focus-visible,label:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+button{cursor:pointer}
+img{max-width:100%}
+.ambient-grid{position:fixed;inset:0;pointer-events:none;opacity:.24;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(circle at 50% 40%,black,transparent 72%)}
+.ambient-grid::before,.ambient-grid::after{content:'';position:fixed;width:34vw;height:34vw;border-radius:50%;filter:blur(80px);opacity:.15;animation:ambient-drift 10s ease-in-out infinite alternate}
+.ambient-grid::before{left:-8vw;top:-10vw;background:var(--coral)}
+.ambient-grid::after{right:-10vw;bottom:-12vw;background:var(--blue);animation-delay:-4s}
+@keyframes ambient-drift{to{transform:translate3d(4vw,3vw,0) scale(1.16)}}
+.app-shell{position:relative;width:min(100%,440px);height:min(920px,calc(100svh - 32px));min-height:650px;background:linear-gradient(180deg,#0f171f 0%,#090f15 100%);border:1px solid rgba(255,255,255,.09);border-radius:34px;overflow:hidden;box-shadow:var(--shadow);isolation:isolate}
+.app-shell::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 82% -10%,rgba(242,177,93,.11),transparent 31%),radial-gradient(circle at 5% 94%,rgba(107,185,238,.08),transparent 32%);z-index:-1}
+.fx-layer{position:absolute;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;padding:max(20px,env(safe-area-inset-top)) 18px calc(92px + env(safe-area-inset-bottom));opacity:0;visibility:hidden;transform:translateY(12px) scale(.995);transition:opacity .32s ease,transform .36s cubic-bezier(.2,.8,.2,1),visibility .32s}
+.screen::-webkit-scrollbar{display:none}
+.screen.is-active{opacity:1;visibility:visible;transform:none}
+.screen.is-leaving{opacity:0;transform:translateY(-8px) scale(.995)}
+@keyframes fade-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+@keyframes scale-in{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+@keyframes float-soft{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes scan-line{0%{transform:translateY(-130%)}100%{transform:translateY(330%)}}
+.topbar{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;margin-bottom:20px}
+.home-topbar{margin-bottom:16px}
+.brand-lockup{display:flex;align-items:center;gap:11px;min-width:0}
+.brand-mark{position:relative;width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,var(--amber-2),var(--amber));color:#21170b;display:grid;place-items:center;box-shadow:0 12px 30px rgba(242,177,93,.22);flex:0 0 auto}
+.brand-mark span{font-size:13px;font-weight:1000;letter-spacing:-.06em;z-index:1}
+.brand-mark i{position:absolute;inset:7px;border:1px solid rgba(33,23,11,.24);border-radius:8px}
+.brand-lockup b{display:block;font-size:12px;letter-spacing:.16em;line-height:1.2}
+.brand-lockup small{display:block;margin-top:4px;font-size:9px;color:var(--muted);letter-spacing:.06em}
+.round-btn{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.035);color:var(--text);display:grid;place-items:center;font-size:19px;transition:.18s ease;flex:0 0 auto}
+.round-btn:hover{background:rgba(255,255,255,.08);border-color:var(--line-strong);transform:translateY(-1px)}
+.round-btn:active{transform:scale(.92)}
+.round-btn.back-btn{font-size:20px}
+.page-title{text-align:center;flex:1;min-width:0}
+.page-title h2{margin:3px 0 0;font-size:18px;letter-spacing:.03em}
+.page-title .hud-label{margin:0}
+.hud-label{margin:0;color:var(--muted-2);font-size:8px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+.topbar-spacer{width:42px;height:42px}
+.home-main{position:relative;z-index:2}
+.intro-row{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin:7px 0 22px;animation:fade-up .55s .04s both}
+.intro-row h1{margin:9px 0 0;font-family:var(--serif);font-size:clamp(35px,9.5vw,45px);line-height:1.07;font-weight:900;letter-spacing:-.06em}
+.intro-row h1 span{color:var(--amber-2)}
+.status-orbit{position:relative;width:82px;height:82px;display:grid;place-items:center;flex:0 0 auto;margin-right:2px}
+.orbit-ring{position:absolute;inset:0;border:1px solid rgba(101,229,178,.22);border-radius:50%;border-top-color:var(--mint);animation:spin 5s linear infinite}
+.orbit-ring.ring-2{inset:12px;border-color:rgba(242,177,93,.15);border-right-color:var(--amber);animation-direction:reverse;animation-duration:3.4s}
+.status-orbit span{font-size:19px;font-weight:1000;color:var(--mint);letter-spacing:-.08em}
+.status-orbit small{position:absolute;bottom:8px;font-size:7px;color:var(--muted);letter-spacing:.08em}
+.feature-card{position:relative;border-radius:26px;padding:17px;background:linear-gradient(145deg,#172631 0%,#101922 58%,#1d1b1b 100%);border:1px solid rgba(242,177,93,.21);overflow:hidden;box-shadow:0 20px 55px rgba(0,0,0,.28);animation:fade-up .58s .1s both}
+.feature-card::before{content:'';position:absolute;left:0;top:24px;bottom:24px;width:3px;border-radius:0 3px 3px 0;background:linear-gradient(var(--amber),var(--coral))}
+.feature-card::after{content:'CASE';position:absolute;right:-12px;top:57px;font-size:83px;line-height:1;font-weight:1000;letter-spacing:-.09em;color:rgba(255,255,255,.025);transform:rotate(90deg);pointer-events:none}
+.scan-sheen{position:absolute;inset:-40%;background:linear-gradient(110deg,transparent 38%,rgba(255,255,255,.055) 48%,transparent 58%);transform:translateX(-48%) rotate(2deg);animation:feature-sheen 7s ease-in-out infinite;pointer-events:none}
+@keyframes feature-sheen{0%,55%{transform:translateX(-55%) rotate(2deg)}75%,100%{transform:translateX(55%) rotate(2deg)}}
+.feature-top{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.live-tag{display:inline-flex;align-items:center;gap:7px;font-size:9px;font-weight:900;letter-spacing:.08em;color:var(--amber-2)}
+.live-tag i{width:6px;height:6px;border-radius:50%;background:var(--coral);box-shadow:0 0 0 4px rgba(255,107,95,.1);animation:dot-pulse 1.6s infinite}
+@keyframes dot-pulse{50%{box-shadow:0 0 0 7px rgba(255,107,95,0)}}
+.feature-code{font-size:8px;color:var(--muted);letter-spacing:.16em}
+.feature-body{position:relative;z-index:1;display:flex;align-items:center;gap:14px}
+.feature-icon{width:65px;height:65px;border-radius:21px;display:grid;place-items:center;font-size:31px;background:linear-gradient(145deg,rgba(242,177,93,.18),rgba(255,107,95,.08));border:1px solid rgba(242,177,93,.17);animation:float-soft 4s ease-in-out infinite}
+.feature-copy{min-width:0}
+.feature-copy p{margin:0 0 5px;color:var(--coral-2);font-size:9px;font-weight:800;letter-spacing:.06em}
+.feature-copy h2{margin:0;font-family:var(--serif);font-size:20px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.feature-copy span{display:block;margin-top:6px;color:var(--muted);font-size:10px}
+.feature-meta{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);margin:16px 0 14px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.feature-meta div{text-align:center;border-right:1px solid var(--line)}
+.feature-meta div:last-child{border-right:0}
+.feature-meta span{display:block;color:var(--muted-2);font-size:8px;letter-spacing:.12em}
+.feature-meta strong{display:block;margin-top:4px;font-size:12px}
+.feature-btn{position:relative;z-index:1}
+.primary-btn,.secondary-btn{border:0;border-radius:15px;min-height:48px;padding:13px 17px;font-weight:900;letter-spacing:.02em;transition:transform .16s,filter .16s,box-shadow .16s;display:flex;align-items:center;justify-content:center;gap:8px}
+.primary-btn{background:linear-gradient(135deg,var(--amber-2),var(--amber));color:#25180a;box-shadow:0 13px 30px rgba(242,177,93,.18)}
+.primary-btn:hover{filter:brightness(1.04);transform:translateY(-2px)}
+.primary-btn:active,.secondary-btn:active{transform:scale(.975)}
+.secondary-btn{background:rgba(255,255,255,.045);border:1px solid var(--line);color:var(--text)}
+.feature-btn{width:100%}
+.feature-btn span,.big-btn span{margin-left:auto;font-size:18px}
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0 26px;animation:fade-up .55s .17s both}
+.quick-card{position:relative;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.028);padding:13px 11px;display:flex;align-items:center;gap:9px;text-align:left;transition:.18s;overflow:hidden}
+.quick-card:hover{background:rgba(255,255,255,.055);border-color:var(--line-strong);transform:translateY(-2px)}
+.quick-icon{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:var(--mint);background:rgba(101,229,178,.08);font-size:18px;flex:0 0 auto}
+.scan-quick .quick-icon{color:var(--blue);background:rgba(107,185,238,.08)}
+.quick-card b{display:block;font-size:11px}
+.quick-card small{display:block;margin-top:3px;color:var(--muted);font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.quick-card i{margin-left:auto;color:var(--muted-2);font-style:normal;font-size:13px}
+.case-section{animation:fade-up .55s .23s both}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px}
+.section-head h2{margin:3px 0 0;font-size:19px;font-family:var(--serif)}
+.section-head.compact{align-items:center;margin-bottom:11px}
+.section-head.compact h2{font-size:17px}
+.text-btn{border:0;background:none;color:var(--muted);font-size:10px;padding:4px;font-weight:800}
+.text-btn span{color:var(--amber);margin-left:3px}
+.case-strip{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding:1px 0 7px;scroll-snap-type:x mandatory}
+.case-strip::-webkit-scrollbar{display:none}
+.mini-case{position:relative;width:164px;min-width:164px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(150deg,rgba(255,255,255,.055),rgba(255,255,255,.018));padding:13px;text-align:left;scroll-snap-align:start;overflow:hidden;transition:.2s}
+.mini-case:hover{transform:translateY(-3px);border-color:rgba(242,177,93,.28)}
+.mini-case::after{content:attr(data-code);position:absolute;right:8px;top:7px;color:rgba(255,255,255,.04);font-size:31px;font-weight:1000}
+.mini-case .mini-icon{font-size:24px;margin-bottom:18px}
+.mini-case p{margin:0;color:var(--muted-2);font-size:8px;letter-spacing:.08em}
+.mini-case h3{margin:5px 0 9px;font-size:13px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-case .mini-foot{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:8px}
+.mini-case .mini-foot b{color:var(--amber-2);font-weight:800}
+.completion-mark{position:absolute;right:9px;bottom:9px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:rgba(101,229,178,.15);color:var(--mint);font-size:9px}
+.safety-tip{display:flex;gap:11px;align-items:center;margin-top:21px;padding:13px;border:1px solid rgba(107,185,238,.13);border-radius:17px;background:rgba(107,185,238,.045);animation:fade-up .55s .3s both}
+.tip-radar{position:relative;width:35px;height:35px;display:grid;place-items:center;flex:0 0 auto;border:1px solid rgba(107,185,238,.25);border-radius:50%}
+.tip-radar::before{content:'';position:absolute;inset:6px;border:1px solid rgba(107,185,238,.2);border-radius:50%;animation:radar-ping 2s infinite}
+.tip-radar i{width:6px;height:6px;border-radius:50%;background:var(--blue)}
+@keyframes radar-ping{0%{transform:scale(.7);opacity:1}100%{transform:scale(1.5);opacity:0}}
+.safety-tip b{display:block;font-size:12px;color:var(--blue)}
+.safety-tip p{margin:3px 0 0;color:var(--muted);font-size:9px;line-height:1.65}
+.bottom-nav{position:absolute;left:14px;right:14px;bottom:max(12px,env(safe-area-inset-bottom));height:65px;z-index:15;border-radius:21px;background:rgba(15,24,32,.88);border:1px solid var(--line);backdrop-filter:blur(18px);display:grid;grid-template-columns:repeat(3,1fr);box-shadow:0 14px 35px rgba(0,0,0,.32);padding:5px}
+.nav-item{border:0;background:none;border-radius:15px;color:var(--muted-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:.18s}
+.nav-item span{font-size:18px}
+.nav-item b{font-size:8px;letter-spacing:.06em}
+.nav-item.is-active{color:var(--amber-2);background:rgba(242,177,93,.075)}
+.archive-count{width:46px;text-align:right}
+.archive-count strong{display:block;font-size:18px;color:var(--amber-2)}
+.archive-count span{font-size:8px;color:var(--muted)}
+.archive-main{padding-bottom:20px}
+.filter-scroll{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding-bottom:16px;margin:0 -2px}
+.filter-scroll::-webkit-scrollbar{display:none}
+.filter-pill{white-space:nowrap;border:1px solid var(--line);background:rgba(255,255,255,.025);border-radius:999px;padding:8px 12px;font-size:9px;color:var(--muted);font-weight:800;transition:.16s}
+.filter-pill.is-active{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.case-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.case-tile{position:relative;border:1px solid var(--line);border-radius:19px;background:linear-gradient(155deg,rgba(255,255,255,.055),rgba(255,255,255,.015));padding:14px;text-align:left;min-height:174px;overflow:hidden;transition:.2s;animation:fade-up .4s both}
+.case-tile:hover{transform:translateY(-3px);border-color:rgba(242,177,93,.27)}
+.case-tile::after{content:attr(data-code);position:absolute;right:8px;top:7px;color:rgba(255,255,255,.035);font-size:45px;font-weight:1000;letter-spacing:-.09em}
+.case-tile .tile-icon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:rgba(242,177,93,.07);font-size:22px;margin-bottom:21px}
+.case-tile .tile-scene{font-size:8px;color:var(--coral-2);font-weight:800;letter-spacing:.08em}
+.case-tile h3{margin:5px 0 11px;font-size:13px;line-height:1.45;min-height:37px}
+.tile-bottom{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.tile-bottom span{font-size:8px;color:var(--muted)}
+.difficulty{display:inline-flex;padding:4px 7px;border-radius:6px;background:rgba(255,255,255,.05);color:var(--muted);font-size:7px;font-weight:900;letter-spacing:.05em}
+.difficulty.入门{color:var(--mint);background:rgba(101,229,178,.08)}
+.difficulty.进阶{color:var(--amber-2);background:rgba(242,177,93,.08)}
+.difficulty.硬核{color:var(--coral-2);background:rgba(255,107,95,.09)}
+.tile-grade{position:absolute;right:12px;bottom:11px;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;color:var(--mint);background:rgba(101,229,178,.11);font-size:11px;font-weight:1000}
+.archive-footer{display:flex;justify-content:space-between;margin-top:18px;padding:12px 2px;color:var(--muted-2);font-size:8px;letter-spacing:.07em}
+.archive-footer b{color:var(--mint);font-size:7px}
+.brief-main{padding-bottom:12px}
+.dossier-cover{position:relative;padding:18px;border-radius:24px;background:linear-gradient(145deg,#eaddc5,#d8c9ad);color:var(--ink);overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.32);animation:fade-up .5s both}
+.dossier-cover::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 30px,rgba(66,48,27,.035) 30px 31px),radial-gradient(circle at 90% 0%,rgba(255,255,255,.4),transparent 33%)}
+.dossier-cover::after{content:'';position:absolute;right:-34px;bottom:-60px;width:165px;height:165px;border:1px solid rgba(65,45,22,.13);border-radius:50%}
+.dossier-pin{position:absolute;left:50%;top:7px;width:42px;height:9px;margin-left:-21px;border-radius:3px;background:rgba(67,48,24,.17);transform:rotate(-2deg)}
+.dossier-top{position:relative;z-index:1;display:flex;justify-content:space-between;font-size:8px;font-weight:900;letter-spacing:.15em;color:rgba(17,24,31,.56)}
+.dossier-top span:last-child{color:#a3352f}
+.dossier-emblem{position:relative;z-index:1;width:65px;height:65px;border-radius:18px;display:grid;place-items:center;margin:31px auto 12px;font-size:34px;background:rgba(17,24,31,.07);border:1px solid rgba(17,24,31,.1);animation:float-soft 4.5s ease-in-out infinite}
+.dossier-en{position:relative;z-index:1;margin:0;text-align:center;color:rgba(17,24,31,.48);font-size:7px;font-weight:900;letter-spacing:.18em}
+.dossier-cover h1{position:relative;z-index:1;margin:7px 0 13px;text-align:center;font-family:var(--serif);font-size:23px;letter-spacing:-.04em}
+.dossier-tags{position:relative;z-index:1;display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.dossier-tags span{padding:5px 8px;border:1px solid rgba(17,24,31,.13);border-radius:6px;font-size:7px;font-weight:900;letter-spacing:.06em}
+.red-stamp{position:absolute;right:19px;bottom:22px;width:57px;height:57px;border:2px solid rgba(163,53,47,.65);border-radius:50%;display:grid;place-items:center;transform:rotate(-14deg);color:rgba(163,53,47,.75);font-size:10px;font-weight:1000;letter-spacing:.1em;opacity:.82}
+.brief-block{margin-top:13px;padding:16px;border:1px solid var(--line);border-radius:19px;background:rgba(255,255,255,.025);animation:fade-up .45s .08s both}
+.brief-block>p:last-child{margin:9px 0 0;color:#bdc8d0;font-size:11px;line-height:1.8}
+.objective-block{animation-delay:.13s}
+.mission-stats{display:grid;grid-template-columns:1fr 1fr;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.mission-stats div{border-right:1px solid var(--line);text-align:center}
+.mission-stats div:last-child{border-right:0}
+.mission-stats b{display:block;font-size:21px;color:var(--amber-2)}
+.mission-stats span{font-size:8px;color:var(--muted)}
+.howto-card{margin-top:13px;padding:15px;border-radius:19px;background:rgba(242,177,93,.045);border:1px solid rgba(242,177,93,.13);animation:fade-up .45s .18s both}
+.howto-title{display:flex;align-items:center;gap:8px;font-size:11px}
+.howto-title span{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:rgba(242,177,93,.11);color:var(--amber-2);font-weight:1000}
+.howto-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px}
+.howto-steps div{position:relative}
+.howto-steps i{font-style:normal;color:var(--amber);font-size:7px;font-weight:1000;letter-spacing:.1em}
+.howto-steps p{margin:4px 0 0;color:var(--muted);font-size:8px;line-height:1.55}
+.big-btn{width:100%;margin-top:14px;min-height:54px;border-radius:17px;font-size:12px}
+.game-screen{padding:0;background:linear-gradient(180deg,#0e171e,#080d12)}
+.game-topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:max(14px,env(safe-area-inset-top)) 15px 12px;background:rgba(8,13,18,.88);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.06)}
+.game-title-wrap{flex:1;min-width:0}
+.game-title-wrap p{margin:0;color:var(--coral-2);font-size:7px;font-weight:900;letter-spacing:.15em}
+.game-title-wrap h2{margin:3px 0 0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timer-box{text-align:right;min-width:57px}
+.timer-box span{display:block;color:var(--muted-2);font-size:7px;letter-spacing:.13em}
+.timer-box strong{display:block;margin-top:2px;font-size:13px;font-variant-numeric:tabular-nums;color:var(--amber-2)}
+.timer-box.is-urgent strong{color:var(--coral);animation:urgent-blink .9s infinite}
+@keyframes urgent-blink{50%{opacity:.45}}
+.game-main{padding:14px 14px calc(105px + env(safe-area-inset-bottom))}
+.evidence-status{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:15px;background:rgba(255,255,255,.032);border:1px solid var(--line);margin-bottom:11px}
+.evidence-copy{min-width:92px}
+.evidence-copy span{display:block;color:var(--muted);font-size:8px}
+.evidence-copy strong{display:block;margin-top:2px;font-size:15px}
+.evidence-copy b{color:var(--amber-2)}
+.evidence-copy i{font-style:normal;color:var(--muted)}
+.evidence-track{height:6px;flex:1;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.065)}
+.evidence-track div{height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--amber),var(--coral));box-shadow:0 0 15px rgba(242,177,93,.28);transition:width .45s cubic-bezier(.2,.8,.2,1)}
+.case-context{padding:12px 13px;border-left:2px solid var(--coral);border-radius:0 12px 12px 0;background:rgba(255,107,95,.045);color:#bac7cf;font-size:9px;line-height:1.7;margin-bottom:16px}
+.transcript-head{display:flex;align-items:center;justify-content:space-between;margin:0 2px 10px;color:var(--muted);font-size:8px;font-weight:800;letter-spacing:.07em}
+.transcript-head b{font-size:7px;color:var(--muted-2);font-weight:500}
+.transcript{display:flex;flex-direction:column;gap:12px;padding-bottom:9px}
+.message{display:flex;gap:8px;align-items:flex-end;animation:message-in .38s both;max-width:94%}
+.message.victim{align-self:flex-end;flex-direction:row-reverse}
+@keyframes message-in{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.msg-avatar{width:29px;height:29px;border-radius:10px;display:grid;place-items:center;background:#1b2a35;border:1px solid var(--line);font-size:14px;flex:0 0 auto;margin-bottom:2px}
+.message.victim .msg-avatar{background:rgba(101,229,178,.09);color:var(--mint)}
+.msg-wrap{min-width:0}
+.msg-sender{margin:0 0 4px 4px;color:var(--muted-2);font-size:7px}
+.message.victim .msg-sender{text-align:right;margin:0 4px 4px 0}
+.msg-bubble{position:relative;padding:11px 12px;border-radius:5px 16px 16px 16px;background:#17242e;border:1px solid rgba(255,255,255,.07);font-size:12px;line-height:1.9;color:#e4eaee;box-shadow:0 7px 18px rgba(0,0,0,.12)}
+.message.victim .msg-bubble{border-radius:16px 5px 16px 16px;background:rgba(101,229,178,.075);border-color:rgba(101,229,178,.12);color:#d8f7eb}
+.voice-line{display:flex;align-items:center;gap:7px}
+.voice-wave{color:var(--blue);letter-spacing:1px;font-size:15px}
+.voice-duration{color:var(--muted-2);font-size:8px;margin-left:3px}
+.segment{position:relative;border-radius:4px;cursor:pointer;transition:background .18s,color .18s,box-shadow .18s;padding:1px 0;touch-action:manipulation}
+.segment:hover{background:rgba(242,177,93,.12);color:var(--amber-2)}
+.segment.is-hit{background:linear-gradient(180deg,transparent 9%,rgba(242,177,93,.4) 9%,rgba(242,177,93,.4) 87%,transparent 87%);color:#fff4df;box-shadow:inset 0 -1px var(--amber);padding:1px 2px;margin:0 -1px;animation:evidence-lock .45s cubic-bezier(.2,.8,.2,1)}
+.segment.is-hit::after{content:'✓';position:absolute;right:-7px;top:-9px;width:13px;height:13px;border-radius:50%;display:grid;place-items:center;background:var(--amber);color:#25180a;font-size:7px;font-weight:1000;box-shadow:0 2px 7px rgba(0,0,0,.3)}
+@keyframes evidence-lock{0%{transform:scale(.9);filter:brightness(1.8)}55%{transform:scale(1.035)}100%{transform:scale(1)}}
+.segment.is-wrong{background:rgba(255,107,95,.27);box-shadow:inset 0 -1px var(--coral);animation:wrong-shake .35s}
+.segment.is-wrong::after{content:'×';position:absolute;right:-7px;top:-9px;width:13px;height:13px;border-radius:50%;display:grid;place-items:center;background:var(--coral);color:white;font-size:8px;font-weight:1000}
+@keyframes wrong-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.segment.is-locked{cursor:default}
+.hint-banner{position:fixed;left:29px;right:29px;bottom:calc(94px + env(safe-area-inset-bottom));z-index:22;display:flex;align-items:center;gap:9px;padding:11px 12px;border-radius:14px;background:rgba(242,177,93,.95);color:#26190b;box-shadow:0 15px 35px rgba(0,0,0,.28);animation:sheet-in .3s;max-width:382px;margin:auto}
+.hint-banner.hidden{display:none}
+.hint-banner span{font-size:17px}
+.hint-banner p{flex:1;margin:0;font-size:9px;line-height:1.55;font-weight:800}
+.hint-banner button{border:0;background:rgba(38,25,11,.09);width:22px;height:22px;border-radius:50%;color:#26190b}
+.game-dock{position:fixed;left:14px;right:14px;bottom:max(10px,env(safe-area-inset-bottom));z-index:21;display:grid;grid-template-columns:1fr 1.6fr;gap:8px;padding:7px;border-radius:20px;background:rgba(13,21,28,.92);border:1px solid var(--line);backdrop-filter:blur(18px);box-shadow:0 18px 45px rgba(0,0,0,.35);max-width:412px;margin:auto}
+.dock-btn{min-height:50px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.035);display:grid;grid-template-columns:25px 1fr;grid-template-rows:1fr 1fr;text-align:left;padding:7px 9px;align-items:center;transition:.16s}
+.dock-btn>span{grid-row:1/3;font-size:18px}
+.dock-btn b{font-size:10px;align-self:end}
+.dock-btn small{font-size:7px;color:var(--muted);align-self:start;margin-top:1px}
+.submit-btn{background:linear-gradient(135deg,var(--amber-2),var(--amber));color:#26190b;border-color:transparent}
+.submit-btn small{color:rgba(38,25,11,.62)}
+.dock-btn:active{transform:scale(.98)}
+.result-main{padding-top:4px}
+.result-hero{text-align:center;animation:fade-up .5s both}
+.result-hero>p{margin:0;color:var(--coral-2);font-size:8px;font-weight:1000;letter-spacing:.22em}
+.grade-orbit{position:relative;width:178px;height:178px;margin:17px auto 14px;display:grid;place-items:center}
+.grade-ring{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(242,177,93,.2);background:radial-gradient(circle,rgba(242,177,93,.1),transparent 62%)}
+.grade-ring::before{content:'';position:absolute;inset:9px;border-radius:50%;border:1px dashed rgba(242,177,93,.3);animation:spin 16s linear infinite}
+.grade-ring::after{content:'';position:absolute;inset:25px;border-radius:50%;border:1px solid rgba(255,255,255,.07)}
+.grade-letter{position:relative;z-index:2;font-size:82px;font-weight:1000;line-height:1;letter-spacing:-.1em;color:var(--amber-2);filter:drop-shadow(0 8px 20px rgba(242,177,93,.18));animation:grade-pop .65s .1s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes grade-pop{from{opacity:0;transform:scale(1.8) rotate(-8deg);filter:blur(10px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
+.grade-stamp{position:absolute;right:-29px;bottom:29px;padding:5px 7px;border:1px solid var(--coral);border-radius:5px;color:var(--coral-2);font-size:7px;font-weight:900;transform:rotate(-8deg);background:rgba(255,107,95,.06);animation:stamp-in .45s .55s both}
+@keyframes stamp-in{from{opacity:0;transform:scale(1.8) rotate(-18deg)}to{opacity:1;transform:scale(1) rotate(-8deg)}}
+.result-hero h1{margin:0;font-family:var(--serif);font-size:22px}
+.result-hero>p:last-child{max-width:310px;margin:7px auto 0;color:var(--muted);font-size:10px;line-height:1.65}
+.result-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:20px 0 17px;animation:fade-up .5s .12s both}
+.result-stats div{padding:12px 4px;text-align:center;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.025)}
+.result-stats span{display:block;color:var(--muted);font-size:8px}
+.result-stats strong{display:block;margin-top:5px;font-size:15px;color:var(--amber-2);font-variant-numeric:tabular-nums}
+.chain-preview{padding:15px;border-radius:19px;border:1px solid var(--line);background:rgba(255,255,255,.025);animation:fade-up .5s .18s both}
+.chain-preview .section-head>span{font-size:7px;color:var(--muted);letter-spacing:.08em}
+.chain-flow{display:flex;gap:3px;overflow:hidden}
+.chain-node{position:relative;flex:1;padding-top:12px;text-align:center;min-width:0}
+.chain-node::before{content:'';position:absolute;top:4px;left:0;right:0;height:1px;background:rgba(242,177,93,.25)}
+.chain-node::after{content:'';position:absolute;left:50%;top:1px;width:7px;height:7px;margin-left:-3px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 4px rgba(242,177,93,.08)}
+.chain-node span{display:block;color:var(--amber-2);font-size:7px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.result-actions{display:grid;gap:8px;margin-top:14px;animation:fade-up .5s .24s both}
+.report-main{padding-bottom:14px}
+.report-case-head{text-align:center;padding:8px 0 18px;animation:fade-up .45s both}
+.report-case-head span{color:var(--coral-2);font-size:8px;font-weight:900;letter-spacing:.16em}
+.report-case-head h1{margin:8px 0;font-family:var(--serif);font-size:25px}
+.report-case-head p{margin:0;color:var(--muted);font-size:10px;line-height:1.8;text-align:left}
+.report-section{margin-bottom:16px}
+.trace-map{position:relative;padding-left:24px}
+.trace-map::before{content:'';position:absolute;left:8px;top:8px;bottom:8px;width:1px;background:linear-gradient(var(--amber),var(--coral),var(--blue))}
+.trace-item{position:relative;padding:0 0 14px 8px;animation:fade-up .4s both}
+.trace-item:last-child{padding-bottom:0}
+.trace-item::before{content:'';position:absolute;left:-20px;top:4px;width:8px;height:8px;border-radius:50%;background:var(--bg);border:2px solid var(--amber);box-shadow:0 0 0 4px rgba(242,177,93,.06)}
+.trace-item span{display:block;color:var(--amber-2);font-size:8px;font-weight:900;letter-spacing:.06em}
+.trace-item p{margin:4px 0 0;color:var(--muted);font-size:9px;line-height:1.65}
+.flaw-list{display:flex;flex-direction:column;gap:8px}
+.flaw-card{border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025);overflow:hidden;animation:fade-up .4s both}
+.flaw-card.is-missed{border-color:rgba(255,107,95,.2)}
+.flaw-toggle{width:100%;border:0;background:none;display:flex;align-items:center;gap:10px;padding:12px;text-align:left}
+.flaw-index{width:27px;height:27px;display:grid;place-items:center;border-radius:9px;background:rgba(242,177,93,.1);color:var(--amber-2);font-size:9px;font-weight:1000;flex:0 0 auto}
+.flaw-card.is-missed .flaw-index{background:rgba(255,107,95,.1);color:var(--coral-2)}
+.flaw-title{flex:1;min-width:0}
+.flaw-title b{display:block;font-size:10px}
+.flaw-title span{display:block;margin-top:3px;color:var(--muted);font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flaw-status{font-size:7px;font-weight:900;color:var(--mint);border:1px solid rgba(101,229,178,.18);border-radius:5px;padding:3px 5px}
+.is-missed .flaw-status{color:var(--coral-2);border-color:rgba(255,107,95,.18)}
+.flaw-toggle>i{font-style:normal;color:var(--muted);transition:transform .2s}
+.flaw-card.is-open .flaw-toggle>i{transform:rotate(45deg)}
+.flaw-detail{display:none;padding:0 12px 13px 49px}
+.flaw-card.is-open .flaw-detail{display:block;animation:fade-in .2s}
+.flaw-quote{margin:0 0 9px;padding:8px 9px;border-left:2px solid var(--amber);background:rgba(242,177,93,.06);color:#e7d6b7;font-size:9px;line-height:1.65}
+.flaw-detail p{margin:6px 0;color:var(--muted);font-size:9px;line-height:1.65}
+.flaw-detail p b{color:var(--text);font-weight:800}
+.report-safety{margin-top:4px}
+.profile-main{padding-bottom:12px}
+.profile-rank{padding:19px;border-radius:22px;background:linear-gradient(145deg,rgba(242,177,93,.13),rgba(255,107,95,.05));border:1px solid rgba(242,177,93,.18);text-align:center;animation:fade-up .45s both}
+.profile-rank .rank-label{font-size:8px;color:var(--muted);letter-spacing:.14em}
+.profile-rank h1{margin:8px 0 4px;font-family:var(--serif);font-size:24px;color:var(--amber-2)}
+.profile-rank p{margin:0;color:var(--muted);font-size:9px}
+.profile-stats{display:grid;grid-template-columns:repeat(3,1fr);margin-top:12px;gap:8px}
+.profile-stats div{padding:12px 5px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025);text-align:center}
+.profile-stats strong{display:block;font-size:18px;color:var(--text)}
+.profile-stats span{display:block;margin-top:3px;font-size:8px;color:var(--muted)}
+.radar-card{margin-top:12px;padding:15px;border:1px solid var(--line);border-radius:19px;background:rgba(255,255,255,.025);text-align:center}
+.radar-card h2{margin:3px 0 4px;font-size:17px;font-family:var(--serif)}
+.radar-wrap{position:relative;height:230px;margin-top:5px}
+.radar-wrap svg{width:100%;height:100%;overflow:visible}
+.radar-label{font-size:7px;fill:var(--muted)}
+.radar-polygon{transform-origin:center;animation:radar-draw .85s cubic-bezier(.2,.8,.2,1) both}
+@keyframes radar-draw{from{opacity:0;transform:scale(.2) rotate(-30deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+.mastery-list{margin-top:13px;display:flex;flex-direction:column;gap:9px}
+.mastery-row{display:grid;grid-template-columns:65px 1fr 31px;align-items:center;gap:8px}
+.mastery-row span{font-size:8px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mastery-track{height:5px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden}
+.mastery-track i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--amber),var(--mint));width:0;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.mastery-row b{text-align:right;font-size:8px;color:var(--amber-2)}
+.history-card{margin-top:12px;padding:15px;border:1px solid var(--line);border-radius:19px;background:rgba(255,255,255,.025)}
+.history-card h2{margin:3px 0 12px;font-size:17px;font-family:var(--serif)}
+.history-item{display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.055)}
+.history-item:last-child{border-bottom:0}
+.history-grade{width:29px;height:29px;border-radius:9px;display:grid;place-items:center;background:rgba(242,177,93,.1);color:var(--amber-2);font-size:10px;font-weight:1000}
+.history-copy{flex:1;min-width:0}
+.history-copy b{display:block;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.history-copy span{display:block;margin-top:2px;color:var(--muted);font-size:7px}
+.history-score{font-size:9px;color:var(--mint)}
+.empty-profile{padding:20px 10px;color:var(--muted);font-size:9px;line-height:1.7;text-align:center}
+.beta-pill{font-size:7px;font-weight:1000;letter-spacing:.12em;color:var(--mint);border:1px solid rgba(101,229,178,.2);border-radius:999px;padding:5px 7px}
+.scan-main{padding-bottom:10px}
+.scanner-card{padding:15px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.015));animation:fade-up .45s both}
+.scanner-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.scanner-head>b{font-size:8px;color:var(--mint);letter-spacing:.08em}
+.upload-zone{position:relative;display:block;border:1px dashed rgba(107,185,238,.28);border-radius:17px;background:rgba(107,185,238,.035);overflow:hidden;cursor:pointer;transition:.2s}
+.upload-zone:hover{background:rgba(107,185,238,.065)}
+.upload-zone input{display:none}
+.upload-visual{position:relative;padding:26px 12px;text-align:center;overflow:hidden}
+.upload-visual::after{content:'';position:absolute;left:12%;right:12%;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);box-shadow:0 0 16px var(--blue);animation:scan-line 2.5s ease-in-out infinite}
+.scan-frame{position:relative;width:56px;height:56px;margin:0 auto 13px;border:1px solid rgba(107,185,238,.38);border-radius:12px}
+.scan-frame::before,.scan-frame::after{content:'';position:absolute;width:12px;height:12px;border-color:var(--blue);border-style:solid}
+.scan-frame::before{left:-1px;top:-1px;border-width:2px 0 0 2px;border-radius:5px 0 0}
+.scan-frame::after{right:-1px;bottom:-1px;border-width:0 2px 2px 0;border-radius:0 0 5px}
+.scan-frame span{position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border:1px solid rgba(107,185,238,.35);border-radius:50%;animation:radar-ping 2s infinite}
+.scan-frame i{position:absolute;inset:18px;border-radius:50%;background:var(--blue);box-shadow:0 0 20px rgba(107,185,238,.45)}
+.upload-zone b{display:block;font-size:11px}
+.upload-zone small{display:block;margin-top:6px;color:var(--muted);font-size:8px}
+#uploadPreview{display:block;width:100%;max-height:180px;object-fit:cover;animation:fade-in .25s}
+.paste-area{margin-top:12px}
+.paste-area>label{display:block;margin-bottom:7px;color:var(--muted);font-size:8px;font-weight:800;letter-spacing:.06em}
+.paste-area textarea{width:100%;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.18);color:var(--text);font:10px/1.75 var(--sans);padding:11px;resize:vertical;min-height:112px;transition:.18s}
+.paste-area textarea:focus{border-color:rgba(242,177,93,.35);box-shadow:0 0 0 3px rgba(242,177,93,.05)}
+.paste-actions{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+.paste-actions span{font-size:7px;color:var(--muted-2)}
+.scan-result{margin-top:12px;animation:fade-up .4s both}
+.scan-result.hidden{display:none}
+.risk-meter{display:flex;align-items:center;gap:14px;padding:14px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.025)}
+.risk-orbit{position:relative;width:82px;height:82px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(255,107,95,.25);flex:0 0 auto}
+.risk-orbit::before{content:'';position:absolute;inset:7px;border-radius:50%;border:2px solid transparent;border-top-color:var(--coral);animation:spin 2s linear infinite}
+.risk-orbit strong{font-size:26px;color:var(--coral-2)}
+.risk-orbit span{position:absolute;bottom:12px;font-size:6px;color:var(--muted)}
+.risk-copy p{margin:0;color:var(--muted-2);font-size:7px;letter-spacing:.13em}
+.risk-copy h2{margin:4px 0 5px;font-size:19px;color:var(--coral-2)}
+.risk-copy span{display:block;color:var(--muted);font-size:8px;line-height:1.55}
+.scan-flaws{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.scan-flaw{display:flex;gap:9px;align-items:flex-start;padding:10px;border:1px solid rgba(255,107,95,.13);border-radius:13px;background:rgba(255,107,95,.035);animation:fade-up .3s both}
+.scan-flaw b{font-size:8px;color:var(--coral-2);white-space:nowrap}
+.scan-flaw p{margin:0;color:var(--muted);font-size:8px;line-height:1.55}
+.scanner-note{margin:12px 4px 0;color:var(--muted-2);font-size:7px;line-height:1.65;text-align:center}
+.sheet-backdrop,.modal-backdrop{position:absolute;inset:0;z-index:60;background:rgba(2,6,10,.62);backdrop-filter:blur(7px);display:flex;align-items:flex-end;justify-content:center;padding:10px;animation:fade-in .2s}
+.modal-backdrop{align-items:center;padding:22px}
+.hidden{display:none!important}
+.bottom-sheet{width:100%;max-width:412px;border-radius:24px;background:#111b23;border:1px solid var(--line-strong);padding:11px 18px calc(18px + env(safe-area-inset-bottom));text-align:center;box-shadow:0 -15px 50px rgba(0,0,0,.4);animation:sheet-in .32s cubic-bezier(.2,.9,.2,1)}
+@keyframes sheet-in{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+.sheet-handle{width:38px;height:4px;border-radius:99px;background:rgba(255,255,255,.12);margin:0 auto 13px}
+.sheet-icon{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;margin:0 auto 10px;background:rgba(242,177,93,.11);color:var(--amber-2);font-size:20px;font-weight:1000}
+.bottom-sheet h2{margin:0;font-size:17px}
+.bottom-sheet p{margin:7px auto 15px;color:var(--muted);font-size:10px;line-height:1.7;max-width:320px}
+.bottom-sheet .primary-btn{width:100%}
+.confirm-card{width:100%;max-width:340px;padding:22px 18px 16px;border-radius:23px;background:#111b23;border:1px solid var(--line-strong);text-align:center;box-shadow:var(--shadow);animation:scale-in .25s}
+.confirm-mark{width:50px;height:50px;display:grid;place-items:center;margin:0 auto 12px;border-radius:15px;background:rgba(242,177,93,.1);color:var(--amber-2);font-size:24px}
+.confirm-card h2{margin:0;font-size:18px}
+.confirm-card p{margin:8px 0 16px;color:var(--muted);font-size:10px;line-height:1.7}
+.confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.confirm-actions button{min-height:44px;font-size:10px}
+.toast{position:absolute;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));z-index:70;transform:translate(-50%,16px);opacity:0;pointer-events:none;padding:9px 13px;border-radius:999px;background:var(--paper);color:var(--ink);font-size:9px;font-weight:900;white-space:nowrap;box-shadow:0 10px 30px rgba(0,0,0,.35);transition:.22s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.spark{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--amber);animation:spark-fly .8s ease-out forwards}
+@keyframes spark-fly{from{opacity:1;transform:translate(0,0) scale(1)}to{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2)}}
+.confetti{position:absolute;width:5px;height:10px;border-radius:2px;animation:confetti-fall 1.8s ease-in forwards}
+@keyframes confetti-fall{from{opacity:1;transform:translate3d(0,-20px,0) rotate(0)}to{opacity:0;transform:translate3d(var(--dx),90vh,0) rotate(720deg)}}
+@media(max-width:540px){body{padding:0;display:block;overflow:hidden}.app-shell{width:100%;height:100svh;min-height:0;border:0;border-radius:0}.screen{padding-left:18px;padding-right:18px}.game-screen{padding:0}.game-main{padding-left:14px;padding-right:14px}.bottom-nav{left:12px;right:12px}.game-dock{left:10px;right:10px}.hint-banner{left:20px;right:20px}}
+@media(max-height:720px){body{padding:0}.app-shell{height:100svh;min-height:0;border-radius:0}.intro-row{margin-bottom:16px}.intro-row h1{font-size:34px}.feature-body{gap:11px}.feature-icon{width:55px;height:55px;font-size:27px}.feature-copy h2{font-size:18px}.feature-meta{margin:12px 0}.quick-grid{margin-bottom:19px}.grade-orbit{width:150px;height:150px}.grade-letter{font-size:70px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+[hidden]{display:none!important}
+.segment{user-select:none;-webkit-user-select:none}
+.scan-flaw:last-child{margin-bottom:0}
+
+</style>
+</head>
+<body>
+<div class='ambient-grid' aria-hidden='true'></div>
+<div class='app-shell' id='app'>
+  <div class='fx-layer' id='fxLayer' aria-hidden='true'></div>
+
+  <section class='screen is-active' id='homeScreen'>
+    <header class='topbar home-topbar'>
+      <div class='brand-lockup'>
+        <div class='brand-mark'><span>FT</span><i></i></div>
+        <div><b>FRAUD TRACE</b><small>骗局溯源 · 反诈推理师</small></div>
+      </div>
+      <button class='round-btn' id='soundBtn' type='button' aria-label='切换音效'><span id='soundIcon'>◉</span></button>
+    </header>
+
+    <main class='home-main'>
+      <div class='intro-row'>
+        <div><p class='hud-label'>CAMPUS CASE UNIT / 校园案件组</p><h1>今天，<br><span>识破谁？</span></h1></div>
+        <div class='status-orbit' aria-hidden='true'><div class='orbit-ring'></div><div class='orbit-ring ring-2'></div><span>AI</span><small>研判中</small></div>
+      </div>
+
+      <section class='feature-card' id='featureCard' aria-label='今日推荐案件'>
+        <div class='scan-sheen'></div>
+        <div class='feature-top'><span class='live-tag'><i></i>今日推荐</span><span class='feature-code' id='featureCode'>CASE 002</span></div>
+        <div class='feature-body'>
+          <div class='feature-icon' id='featureIcon'>💸</div>
+          <div class='feature-copy'><p id='featureScene'>兼职刷单 · 高风险</p><h2 id='featureTitle'>日赚300的刷单兼职</h2><span id='featureHook'>先垫98，做完连本带利返</span></div>
+        </div>
+        <div class='feature-meta'>
+          <div><span>破绽</span><strong id='featureFlaws'>6</strong></div>
+          <div><span>难度</span><strong id='featureDifficulty'>入门</strong></div>
+          <div><span>用时</span><strong id='featureTime'>≈2 min</strong></div>
+        </div>
+        <button class='primary-btn feature-btn' id='featureStart' type='button'>进入案件<span>→</span></button>
+      </section>
+      <div class='quick-grid'>
+        <button class='quick-card scan-quick' id='scanQuick' type='button'><span class='quick-icon'>⌁</span><span><b>截图研判</b><small>可疑聊天，快速筛查</small></span><i>→</i></button>
+        <button class='quick-card' id='profileQuick' type='button'><span class='quick-icon'>◈</span><span><b>能力画像</b><small>看见你的防骗盲区</small></span><i>→</i></button>
+      </div>
+      <section class='case-section'>
+        <div class='section-head'><div><p class='hud-label'>CASE FILES</p><h2>案件档案</h2></div><button class='text-btn' id='viewAllBtn' type='button'>查看全部 <span>08</span></button></div>
+        <div class='case-strip' id='homeCaseList'></div>
+      </section>
+      <div class='safety-tip'><span class='tip-radar'><i></i></span><div><b>96110</b><p>接到反诈预警电话，请立即接听。已经转账，第一时间拨打 110。</p></div></div>
+    </main>
+    <nav class='bottom-nav' aria-label='主导航'>
+      <button class='nav-item is-active' data-nav='home' type='button'><span>⌂</span><b>首页</b></button>
+      <button class='nav-item' data-nav='library' type='button'><span>▤</span><b>案件</b></button>
+      <button class='nav-item' data-nav='profile' type='button'><span>◈</span><b>能力</b></button>
+    </nav>
+  </section>
+
+  <section class='screen' id='libraryScreen'>
+    <header class='topbar'>
+      <button class='round-btn back-btn' data-back='home' type='button' aria-label='返回'>←</button>
+      <div class='page-title'><p class='hud-label'>CASE ARCHIVE</p><h2>案件档案库</h2></div>
+      <div class='archive-count'><strong id='archiveCount'>08</strong><span>案例</span></div>
+    </header>
+    <main class='archive-main'>
+      <div class='filter-scroll' id='filterBar'></div>
+      <div class='case-grid' id='caseGrid'></div>
+      <div class='archive-footer'><span>所有案例均已脱敏改编</span><b>DATA / LOCAL</b></div>
+    </main>
+    <nav class='bottom-nav' aria-label='主导航'>
+      <button class='nav-item' data-nav='home' type='button'><span>⌂</span><b>首页</b></button>
+      <button class='nav-item is-active' data-nav='library' type='button'><span>▤</span><b>案件</b></button>
+      <button class='nav-item' data-nav='profile' type='button'><span>◈</span><b>能力</b></button>
+    </nav>
+  </section>
+
+  <section class='screen' id='briefScreen'>
+    <header class='topbar'>
+      <button class='round-btn' id='briefBack' type='button' aria-label='返回'>←</button>
+      <div class='page-title'><p class='hud-label'>CASE BRIEF</p><h2>案件简报</h2></div>
+      <div class='topbar-spacer'></div>
+    </header>
+    <main class='brief-main'>
+      <article class='dossier-cover'>
+        <div class='dossier-pin'></div>
+        <div class='dossier-top'><span id='briefCode'>CASE 001</span><span id='briefThreat'>中高风险</span></div>
+        <div class='dossier-emblem' id='briefIcon'>📱</div>
+        <p class='dossier-en' id='briefEn'>THE TOO-GOOD PHONE</p>
+        <h1 id='briefTitle'>低价的“99新”手机</h1>
+        <div class='dossier-tags'><span id='briefScene'>二手交易</span><span id='briefDifficulty'>入门</span><span id='briefTime'>≈2 MIN</span></div>
+        <div class='red-stamp' id='briefStamp'>待侦破</div>
+      </article>
+      <section class='brief-block'><p class='hud-label'>BACKGROUND / 案件背景</p><p id='briefBackground'></p></section>
+      <section class='brief-block objective-block'><p class='hud-label'>MISSION / 侦破任务</p><p id='briefObjective'></p><div class='mission-stats'><div><b id='briefFlawCount'>6</b><span>处破绽</span></div><div><b id='briefCredit'>100</b><span>初始可信度</span></div></div></section>
+      <section class='howto-card'><div class='howto-title'><span>?</span><b>怎么玩</b></div><div class='howto-steps'><div><i>01</i><p>点击聊天里可疑的字句</p></div><div><i>02</i><p>锁定破绽，避开误判</p></div><div><i>03</i><p>提交后查看完整骗术链路</p></div></div></section>
+      <button class='primary-btn big-btn' id='startCaseBtn' type='button'>开始勘察<span>→</span></button>
+    </main>
+  </section>
+  <section class='screen game-screen' id='gameScreen'>
+    <header class='game-topbar'>
+      <button class='round-btn' id='gameExit' type='button' aria-label='退出案件'>←</button>
+      <div class='game-title-wrap'><p id='gameCaseCode'>CASE 001</p><h2 id='gameCaseTitle'>低价手机</h2></div>
+      <div class='timer-box'><span>TIME</span><strong id='timerValue'>00:00</strong></div>
+    </header>
+    <main class='game-main'>
+      <div class='evidence-status'><div class='evidence-copy'><span>已锁定证据</span><strong><b id='evidenceCount'>0</b> / <i id='evidenceTotal'>6</i></strong></div><div class='evidence-track'><div id='evidenceBar'></div></div></div>
+      <div class='case-context' id='gameContext'></div>
+      <div class='transcript-head'><span>聊天记录</span><b id='transcriptTime'>今天 20:14</b></div>
+      <div class='transcript' id='transcript'></div>
+      <div class='hint-banner' id='hintBanner'><span>⌁</span><p id='hintText'></p><button id='hintClose' type='button'>×</button></div>
+      <div class='game-dock'><button class='dock-btn hint-btn' id='hintBtn' type='button'><span>⌁</span><b>线索提示</b><small>-5 分</small></button><button class='dock-btn submit-btn' id='submitBtn' type='button'><span>✓</span><b>提交研判</b><small id='submitLabel'>还差 6 处</small></button></div>
+    </main>
+  </section>
+
+  <section class='screen' id='resultScreen'>
+    <header class='topbar'>
+      <button class='round-btn' id='resultBackHome' type='button' aria-label='返回首页'>←</button>
+      <div class='page-title'><p class='hud-label'>CASE REPORT</p><h2>研判结果</h2></div>
+      <button class='round-btn' id='resultShare' type='button' aria-label='分享'>↗</button>
+    </header>
+    <main class='result-main'>
+      <div class='result-hero'>
+        <p>CASE CLOSED</p>
+        <div class='grade-orbit' id='gradeOrbit'><div class='grade-ring'></div><div class='grade-letter' id='gradeLetter'>A</div><span class='grade-stamp' id='gradeStamp'>证据链完整</span></div>
+        <h1 id='gradeTitle'>敏锐的观察者</h1><p id='gradeSubtitle'>你抓住大部分关键破绽，继续保持核实习惯。</p>
+      </div>
+      <div class='result-stats'><div><span>命中</span><strong id='resultHits'>0</strong></div><div><span>误标</span><strong id='resultMisses'>0</strong></div><div><span>用时</span><strong id='resultTime'>00:00</strong></div><div><span>得分</span><strong id='resultScore'>0</strong></div></div>
+      <section class='chain-preview'><div class='section-head compact'><div><p class='hud-label'>FRAUD CHAIN</p><h2>骗术链路</h2></div><span id='chainSteps'>5 STEPS</span></div><div class='chain-flow' id='resultChain'></div></section>
+      <div class='result-actions'><button class='primary-btn' id='viewReportBtn' type='button'>查看完整复盘<span>→</span></button><button class='secondary-btn' id='nextCaseBtn' type='button'>进入下一案</button></div>
+    </main>
+  </section>
+  <section class='screen' id='reportScreen'>
+    <header class='topbar'>
+      <button class='round-btn' id='reportBack' type='button' aria-label='返回'>←</button>
+      <div class='page-title'><p class='hud-label'>DEBRIEF</p><h2>侦探复盘</h2></div>
+      <button class='round-btn' id='reportProfile' type='button' aria-label='能力画像'>◈</button>
+    </header>
+    <main class='report-main'>
+      <section class='report-case-head'><span id='reportCode'>CASE 001</span><h1 id='reportTitle'>低价手机</h1><p id='reportDebrief'></p></section>
+      <section class='report-section'><div class='section-head compact'><div><p class='hud-label'>TRACE MAP</p><h2>骗术链路还原</h2></div></div><div class='trace-map' id='traceMap'></div></section>
+      <section class='report-section'><div class='section-head compact'><div><p class='hud-label'>EVIDENCE LIST</p><h2>破绽逐条拆解</h2></div><span id='evidenceSummary'>0 / 0</span></div><div class='flaw-list' id='flawList'></div></section>
+      <div class='safety-tip report-safety'><span class='tip-radar'><i></i></span><div><b>反诈提醒</b><p>本作品用于风险识别训练，不保证百分百识别诈骗。遇到转账、验证码和屏幕共享要求，请立即停止。</p></div></div>
+      <div class='result-actions'><button class='primary-btn' id='reportNextBtn' type='button'>继续下一案<span>→</span></button></div>
+    </main>
+  </section>
+
+  <section class='screen' id='profileScreen'>
+    <header class='topbar'>
+      <button class='round-btn' id='profileBack' type='button' aria-label='返回'>←</button>
+      <div class='page-title'><p class='hud-label'>ABILITY PROFILE</p><h2>侦探能力画像</h2></div>
+      <button class='round-btn' id='profileReset' type='button' aria-label='重置记录'>↺</button>
+    </header>
+    <main class='profile-main' id='profileContent'></main>
+  </section>
+
+  <section class='screen scan-screen' id='scanScreen'>
+    <header class='topbar'>
+      <button class='round-btn' id='scanBack' type='button' aria-label='返回'>←</button>
+      <div class='page-title'><p class='hud-label'>RISK SCANNER</p><h2>截图研判室</h2></div>
+      <span class='beta-pill'>BETA</span>
+    </header>
+    <main class='scan-main'>
+      <section class='scanner-card'>
+        <div class='scanner-head'><span class='live-tag'><i></i>本地研判引擎</span><b>0.3s</b></div>
+        <label class='upload-zone' for='screenshotInput' id='uploadZone'>
+          <input id='screenshotInput' type='file' accept='image/*'>
+          <div class='upload-visual'><div class='scan-frame'><span></span><i></i></div><b>上传可疑截图</b><small>离线演示版：上传后请粘贴截图中的文字</small></div>
+          <img id='uploadPreview' alt='上传的截图预览' hidden>
+        </label>
+        <div class='paste-area'><label for='scanText'>可疑聊天文字</label><textarea id='scanText' rows='6' placeholder='把聊天内容粘贴到这里，例如：先转我200定金，马上给你发货……'></textarea><div class='paste-actions'><button class='text-btn' id='sampleScanBtn' type='button'>载入示例</button><span id='scanCharCount'>0 字</span></div></div>
+        <button class='primary-btn big-btn' id='analyzeBtn' type='button'>开始智能研判<span>⌁</span></button>
+      </section>
+      <section class='scan-result hidden' id='scanResult'>
+        <div class='risk-meter' id='riskMeter'><div class='risk-orbit'><strong id='riskScore'>0</strong><span>风险指数</span></div><div class='risk-copy'><p>RISK LEVEL</p><h2 id='riskLevel'>等待研判</h2><span id='riskSummary'></span></div></div>
+        <div class='scan-flaws' id='scanFlaws'></div>
+        <button class='secondary-btn' id='convertCaseBtn' type='button'>把这段聊天变成推理关</button>
+      </section>
+      <p class='scanner-note'>当前版本不上传图片到服务器，不保存聊天内容。真实 OCR 接口可在正式部署时接入。</p>
+    </main>
+  </section>
+
+  <div class='sheet-backdrop hidden' id='sheetBackdrop'><div class='bottom-sheet' id='feedbackSheet' role='dialog' aria-modal='true'><div class='sheet-handle'></div><div class='sheet-icon' id='sheetIcon'>!</div><h2 id='sheetTitle'>还没有命中</h2><p id='sheetCopy'></p><button class='primary-btn' id='sheetAction' type='button'>继续勘察</button></div></div>
+  <div class='modal-backdrop hidden' id='confirmModal'><div class='confirm-card' role='dialog' aria-modal='true'><span class='confirm-mark'>⌁</span><h2 id='confirmTitle'>确认提交？</h2><p id='confirmCopy'></p><div class='confirm-actions'><button class='secondary-btn' id='confirmCancel' type='button'>继续找</button><button class='primary-btn' id='confirmOk' type='button'>确认提交</button></div></div></div>
+  <div class='toast' id='toast' role='status' aria-live='polite'></div>
+</div>
+<script>
+const CASES = [
+  {
+    id:'C001', code:'001', title:'低价的“99新”手机', en:'THE TOO-GOOD PHONE', scene:'二手交易', sceneKey:'secondhand', icon:'📱', difficulty:'入门', minutes:2, threat:'中高风险',
+    hook:'便宜三百，只要先交定金',
+    background:'你在校园闲置群看到一台比市场价低一半的手机。对方主动加你私聊，说自己急用钱，还催你尽快决定。',
+    objective:'在这段聊天里找出 6 处可疑话术，判断对方真正想让你做什么。',
+    messages:[
+      {id:'m1', role:'fraud', sender:'出手机的阿杰', text:'同学你好，这手机是我自用的，成色99新，急用钱才出'},
+      {id:'m2', role:'fraud', sender:'出手机的阿杰', text:'平台要抽成，我们私下交易能便宜三百，你先转我定金200'},
+      {id:'m3', role:'victim', sender:'你', text:'我看看能不能走平台担保'},
+      {id:'m4', role:'fraud', sender:'出手机的阿杰', text:'担保太麻烦了，你扫这个码付定金就行，我马上发顺丰'},
+      {id:'m5', role:'fraud', sender:'出手机的阿杰', text:'截图给你看，快递单都打好了，就差付款了'}
+    ],
+    flaws:[
+      {id:'f1', quote:'成色99新', type:'过度承诺', level:2, danger:'用夸张成色描述降低你的心理防线，实物往往与描述不符。', advice:'要求提供带时间水印的实拍视频，不接受仅凭文字描述。'},
+      {id:'f2', quote:'急用钱才出', type:'制造紧迫感', level:2, danger:'“急用钱”会制造捡漏错觉，让你来不及比价和核实。', advice:'越便宜越要核实来源、成色和平台交易记录。'},
+      {id:'f3', quote:'私下交易能便宜三百', type:'脱离平台', level:3, danger:'离开平台就没有担保和交易记录，被骗后难以申诉。', advice:'坚持平台内交易，任何私下转账都不接受。'},
+      {id:'f4', quote:'先转我定金200', type:'诱导预付', level:3, danger:'以定金名义先收钱，是最直接的收割方式。', advice:'未见实物、未确认订单前，不支付任何预付款。'},
+      {id:'f5', quote:'扫这个码付定金', type:'诱导扫码', level:4, danger:'陌生收款码可能通向钓鱼页面或被用于直接扣款。', advice:'不扫陌生人二维码，付款只走官方平台。'},
+      {id:'f6', quote:'马上发顺丰', type:'制造紧迫感', level:2, danger:'用马上发货催促你付款，压缩核实时间。', advice:'越催越停一下，先确认平台订单和物流信息。'}
+    ],
+    chain:[
+      ['引流接触','低价手机在校园群里出现，主动加你私聊'],
+      ['建立信任','自称个人自用，发快递单截图制造真实感'],
+      ['制造焦虑','强调急用钱、马上发货，让你怕错过机会'],
+      ['诱导操作','提出私下交易，要求先转定金并扫码付款'],
+      ['完成收割','付款后拉黑或用假物流拖延，无法申诉']
+    ],
+    debrief:'这不是“捡漏”，而是用低价和紧迫感把你从平台担保中拉走。只要对方开始要求私下转账、先付定金或扫陌生码，就应该立即停止交易。'
+  },
+  {
+    id:'C002', code:'002', title:'日赚300的刷单兼职', en:'THE EASY-MONEY JOB', scene:'兼职刷单', sceneKey:'parttime', icon:'💸', difficulty:'入门', minutes:2, threat:'高风险',
+    hook:'先垫98，做完连本带利返',
+    background:'开学后，你在兼职群里看到一条“学生党优先”的招聘。对方说只需动动手指，每天就能赚 300 元。',
+    objective:'找出 6 处刷单话术，识破“小额返利”背后的垫付陷阱。',
+    messages:[
+      {id:'m1', role:'fraud', sender:'兼职派单员', text:'新人福利，动动手指日赚300，学生党优先，今天只招5个'},
+      {id:'m2', role:'victim', sender:'你', text:'真的不用交押金吗？'},
+      {id:'m3', role:'fraud', sender:'兼职派单员', text:'不用押金，你只要先垫付98元拍3单，马上连本带利返128'},
+      {id:'m4', role:'fraud', sender:'兼职派单员', text:'刚才是连单任务，要做完第5单才能一起提现'},
+      {id:'m5', role:'fraud', sender:'兼职派单员', text:'做完马上提现，超时任务就作废了，别耽误大家'}
+    ],
+    flaws:[
+      {id:'f1', quote:'日赚300', type:'高收益诱惑', level:3, danger:'用远高于正常兼职的收益吸引你，忽略任务是否真实。', advice:'兼职收益明显不合理时，先假设它是骗局。'},
+      {id:'f2', quote:'学生党优先', type:'精准筛选目标', level:2, danger:'专门筛选社会经验较少、想赚零花钱的学生。', advice:'越强调“适合学生”的高收益兼职，越要警惕。'},
+      {id:'f3', quote:'先垫付98元', type:'诱导垫资', level:4, danger:'要求你先出钱，再用返利承诺让你继续投入。', advice:'正规兼职不会要求员工先垫付或充值。'},
+      {id:'f4', quote:'连本带利返128', type:'虚假返利', level:3, danger:'用小额返利建立信任，为后续大额垫付做铺垫。', advice:'不要被第一笔小额返利诱导，立即停止。'},
+      {id:'f5', quote:'连单任务', type:'任务加码', level:4, danger:'以“任务未完成”为由不断要求追加付款。', advice:'出现连单、卡单、补单时，立即保存证据并报警。'},
+      {id:'f6', quote:'超时任务就作废', type:'制造紧迫感', level:3, danger:'用限时机制阻止你冷静思考和向他人求证。', advice:'任何催促转账的限时任务都不正常。'}
+    ],
+    chain:[
+      ['引流接触','兼职群发布高收益招聘，强调学生优先'],
+      ['建立信任','先给小额返利，让你相信任务真实'],
+      ['制造焦虑','用连单、超时作废逼你继续投入'],
+      ['诱导操作','要求垫付、充值或转账完成任务'],
+      ['完成收割','以任务失败为由拒绝提现并拉黑']
+    ],
+    debrief:'刷单返利本身就是高风险陷阱。骗子先用小额返利换取信任，再通过连单任务不断加码。凡是要求先垫付的兼职，都应直接停止。'
+  },
+  {
+    id:'C003', code:'003', title:'辅导员发来的缴费通知', en:'THE FAKE ADVISOR', scene:'冒充身份', sceneKey:'impersonate', icon:'🎓', difficulty:'进阶', minutes:2, threat:'高风险',
+    hook:'今晚8点前转到个人账户',
+    background:'一个头像是辅导员的新好友申请通过后，对方发来一份“实训资料缴费通知”，要求你今晚完成转账。',
+    objective:'找出 6 处冒充老师收费的可疑信号，并给出正确核实方式。',
+    messages:[
+      {id:'m1', role:'fraud', sender:'辅导员-王老师', text:'我是学院新来的辅导员王老师，你的资料需要补充，先加一下'},
+      {id:'m2', role:'fraud', sender:'辅导员-王老师', text:'今晚8点前把398元资料费转到这个个人账户，名单要统一上报'},
+      {id:'m3', role:'victim', sender:'你', text:'我可以在班级群里确认一下吗？'},
+      {id:'m4', role:'fraud', sender:'辅导员-王老师', text:'先别在群里问，名额有限，转完我把你登记上'},
+      {id:'m5', role:'fraud', sender:'辅导员-王老师', text:'转账截图发我，不要打电话，我在开会'}
+    ],
+    flaws:[
+      {id:'f1', quote:'我是学院新来的辅导员王老师', type:'身份未核实', level:3, danger:'新好友的头像和备注都可以伪造，不能作为身份证明。', advice:'通过学校官网、班级群或你原本保存的辅导员电话核实。'},
+      {id:'f2', quote:'转到这个个人账户', type:'个人收款', level:4, danger:'学校正规收费通常有对公账户和正式缴费入口。', advice:'不向陌生个人账户缴纳任何学校费用。'},
+      {id:'f3', quote:'今晚8点前', type:'制造紧迫感', level:3, danger:'限时要求让你来不及核实，是冒充身份诈骗的常用手段。', advice:'时间越紧，越要通过官方渠道确认。'},
+      {id:'f4', quote:'先别在群里问', type:'信息隔离', level:4, danger:'阻止你向同学和老师求证，避免骗局被识破。', advice:'越是让你不要问，越应该立刻在班级群确认。'},
+      {id:'f5', quote:'名额有限', type:'稀缺性操控', level:2, danger:'制造错过就没有的焦虑，促使你快速付款。', advice:'正常学校通知不会用抢名额的方式收费。'},
+      {id:'f6', quote:'不要打电话', type:'阻断核实', level:4, danger:'拒绝电话核实，说明对方可能无法通过真实身份验证。', advice:'挂断聊天，用学校官方电话主动联系辅导员。'}
+    ],
+    chain:[
+      ['引流接触','冒充新辅导员添加好友，先建立身份感'],
+      ['建立信任','使用老师头像、称呼和学院通知口吻'],
+      ['制造焦虑','限定今晚8点前缴费，强调名单上报'],
+      ['诱导操作','要求转到个人账户，阻止群内确认和电话核实'],
+      ['完成收割','收款后拉黑，或以资料费名义继续索要']
+    ],
+    debrief:'老师身份不是靠头像和备注证明的。任何收费都应通过学校官方缴费入口，任何“不要问、不要打电话”的要求都应视为高风险信号。'
+  },
+  {
+    id:'C004', code:'004', title:'室友语音来借钱', en:'THE CLONED VOICE', scene:'熟人冒充', sceneKey:'ai', icon:'🎙️', difficulty:'进阶', minutes:2, threat:'高风险',
+    hook:'声音很像，但电话始终打不通',
+    background:'你收到一条来自“室友小陈”的语音消息。声音听起来确实很像，但对方说手机快没电，要求你马上转账。',
+    objective:'找出 5 处 AI 冒充熟人话术，学会用另一种方式核实身份。',
+    messages:[
+      {id:'m1', role:'fraud', sender:'室友小陈', type:'voice', text:'（语音 8 秒）是我，手机快没电了，我在外面出了点事'},
+      {id:'m2', role:'fraud', sender:'室友小陈', text:'先借我2000，转到我朋友的卡上，回头我马上还你'},
+      {id:'m3', role:'victim', sender:'你', text:'你先打个电话给我，我确认一下'},
+      {id:'m4', role:'fraud', sender:'室友小陈', text:'现在不方便打电话，千万别告诉我爸妈'},
+      {id:'m5', role:'fraud', sender:'室友小陈', text:'就这一次，真的很急，你先转500也可以'}
+    ],
+    flaws:[
+      {id:'f1', quote:'手机快没电了', type:'阻断电话核实', level:3, danger:'用“手机没电”解释为什么不能打电话，避免真实身份暴露。', advice:'不要回拨对方提供的号码，改用你保存的常用号码联系本人。'},
+      {id:'f2', quote:'转到我朋友的卡上', type:'第三方收款', level:4, danger:'钱转给所谓朋友后，追查和止付都会更困难。', advice:'熟人借钱也必须转给本人实名账户，并先核实身份。'},
+      {id:'f3', quote:'马上还你', type:'虚假承诺', level:2, danger:'用快速还款降低你的戒心，但没有任何保障。', advice:'不要用“关系好”替代身份核实和转账凭证。'},
+      {id:'f4', quote:'千万别告诉我爸妈', type:'信息隔离', level:4, danger:'阻止你向家人求证，是骗子控制受害者的常见方式。', advice:'遇到此类要求，立即联系家人或共同好友交叉确认。'},
+      {id:'f5', quote:'先转500也可以', type:'降低门槛', level:3, danger:'先接受小额转账，再继续以各种理由索要更多。', advice:'未核实身份前，一分钱也不要转。'}
+    ],
+    chain:[
+      ['引流接触','用熟人头像和克隆语音发起借钱请求'],
+      ['建立信任','声音相似，加上熟人称呼让你放松警惕'],
+      ['制造焦虑','声称出事、急需用钱，又拒绝电话核实'],
+      ['诱导操作','要求转到朋友账户，并阻止告知父母'],
+      ['完成收割','小额得手后继续加码，直至被识破']
+    ],
+    debrief:'声音、视频和头像都可能被伪造。熟人借钱必须换一种方式核实，尤其要警惕“不能打电话”“别告诉别人”和“转到朋友账户”。'
+  },
+  {
+    id:'C005', code:'005', title:'原价转让的演唱会门票', en:'THE VANISHING TICKET', scene:'票务交易', sceneKey:'ticket', icon:'🎫', difficulty:'进阶', minutes:2, threat:'中高风险',
+    hook:'只差一张内场票，对方却只收私转',
+    background:'你在社交平台看到有人原价转演唱会内场票。对方说临时去不了，但只接受微信转账，还不断强调票很抢手。',
+    objective:'找出 5 处票务诈骗信号，判断应该在哪一步停止交易。',
+    messages:[
+      {id:'m1', role:'fraud', sender:'转票的小雨', text:'内场票原价出，我临时去不了，只支持微信转，先到先得'},
+      {id:'m2', role:'victim', sender:'你', text:'能在平台订单里改实名信息吗？'},
+      {id:'m3', role:'fraud', sender:'转票的小雨', text:'平台抽成太高，你先付680定金，我把票根和身份证发你'},
+      {id:'m4', role:'fraud', sender:'转票的小雨', text:'我这边还有别人要，5分钟内决定，过时我就卖别人了'},
+      {id:'m5', role:'fraud', sender:'转票的小雨', text:'你放心，我朋友圈都是真实生活，怎么可能是骗子'}
+    ],
+    flaws:[
+      {id:'f1', quote:'原价出', type:'低价诱惑', level:2, danger:'热门票原价转让极不常见，低价会让人忽略核实。', advice:'先查官方票价和实名转赠规则，不因低价冲动下单。'},
+      {id:'f2', quote:'只支持微信转', type:'脱离平台', level:4, danger:'私下转账没有平台担保，转账后很难追回。', advice:'只通过官方票务平台或可信的二级平台交易。'},
+      {id:'f3', quote:'先付680定金', type:'诱导预付', level:4, danger:'未见票、未确认实名信息就付定金，容易被直接拉黑。', advice:'未完成官方转赠或订单确认前，不支付任何定金。'},
+      {id:'f4', quote:'5分钟内决定', type:'制造紧迫感', level:3, danger:'限时催促让你来不及核实票源和对方身份。', advice:'票再抢手，也不要在倒计时里转账。'},
+      {id:'f5', quote:'朋友圈都是真实生活', type:'伪造可信度', level:2, danger:'朋友圈内容可以包装，不能证明票务交易真实。', advice:'只认官方订单、实名转赠和平台担保。'}
+    ],
+    chain:[
+      ['引流接触','热门演唱会原价票出现在社交平台'],
+      ['建立信任','展示票根、身份证和朋友圈生活照'],
+      ['制造焦虑','强调票很抢手，限定5分钟内决定'],
+      ['诱导操作','要求微信私转定金，绕开官方实名转赠'],
+      ['完成收割','收款后拉黑，或以补差价为由继续索要']
+    ],
+    debrief:'实名制演出票通常有明确的转赠规则。只要对方拒绝官方平台、要求私转定金或用朋友圈证明身份，就应该停止交易。'
+  },
+  {
+    id:'C006', code:'006', title:'注销校园贷的“客服”', en:'THE DEBT ERASER', scene:'校园贷', sceneKey:'loan', icon:'☎️', difficulty:'硬核', minutes:3, threat:'极高风险',
+    hook:'不注销就影响征信，还要共享屏幕',
+    background:'你接到一个自称金融平台客服的电话。对方准确说出你的姓名和学校，称你名下有一笔校园贷需要立即注销。',
+    objective:'找出 6 处“注销校园贷”骗局信号，避免把贷款额度转给骗子。',
+    messages:[
+      {id:'m1', role:'fraud', sender:'金融客服专员', text:'系统显示你名下校园贷未注销，不及时处理会影响个人征信'},
+      {id:'m2', role:'fraud', sender:'金融客服专员', text:'现在把贷款额度转到安全账户做流水核验，完成后会原路退回'},
+      {id:'m3', role:'victim', sender:'你', text:'我自己在官方App里查一下。'},
+      {id:'m4', role:'fraud', sender:'金融客服专员', text:'你先下载屏幕共享App，我指导你操作，自己弄会失败'},
+      {id:'m5', role:'fraud', sender:'金融客服专员', text:'全程不要挂断，否则额度会被冻结，征信也会留下记录'}
+    ],
+    flaws:[
+      {id:'f1', quote:'校园贷未注销', type:'虚构账户', level:3, danger:'骗子利用你不了解征信规则，制造并不存在的贷款账户。', advice:'不要相信来电显示，自己登录官方平台或征信中心查询。'},
+      {id:'f2', quote:'影响个人征信', type:'制造焦虑', level:4, danger:'用征信受损吓唬你，让你在恐慌中听从指令。', advice:'征信问题只能通过官方渠道核实，不会要求转账处理。'},
+      {id:'f3', quote:'安全账户', type:'虚构收款渠道', level:4, danger:'不存在所谓安全账户，转账后资金会直接进入骗子账户。', advice:'任何要求向安全账户转账的，一律挂断。'},
+      {id:'f4', quote:'原路退回', type:'虚假承诺', level:3, danger:'承诺核验后退款，让你误以为资金只是临时周转。', advice:'不要先转账再等退款，资金一旦转出很难追回。'},
+      {id:'f5', quote:'屏幕共享App', type:'窃取验证码', level:4, danger:'屏幕共享会暴露验证码、银行卡和账户余额。', advice:'不和陌生人共享屏幕，不安装对方指定App。'},
+      {id:'f6', quote:'全程不要挂断', type:'持续控制', level:4, danger:'阻止你向家人、银行或警方求证。', advice:'立即挂断，拨打官方客服或96110核实。'}
+    ],
+    chain:[
+      ['引流接触','冒充金融客服，准确报出个人信息'],
+      ['建立信任','以注销校园贷、保护征信为名取得配合'],
+      ['制造焦虑','声称不处理就影响征信、冻结额度'],
+      ['诱导操作','要求贷款转账、共享屏幕、保持通话'],
+      ['完成收割','转走贷款资金，受害者背上网贷债务']
+    ],
+    debrief:'“注销校园贷”是典型骗局。征信不会通过转账修复，任何安全账户、屏幕共享和保持通话的要求都应立即拒绝。'
+  },
+  {
+    id:'C007', code:'007', title:'游戏账号的担保交易', en:'THE FAKE ESCROW', scene:'游戏交易', sceneKey:'game', icon:'🎮', difficulty:'进阶', minutes:2, threat:'高风险',
+    hook:'买家很爽快，却先让卖家交保证金',
+    background:'你准备出售游戏账号，一名买家很快同意价格，但要求去“他们平台”做担保交易，还发来一个二维码。',
+    objective:'找出 5 处虚假担保信号，避免卖家反过来被保证金套住。',
+    messages:[
+      {id:'m1', role:'fraud', sender:'诚心买号的阿峰', text:'你这号我出价1200，走我们平台有担保，安全又快'},
+      {id:'m2', role:'fraud', sender:'诚心买号的阿峰', text:'先交288保证金，交易完成会和号款一起退给你'},
+      {id:'m3', role:'victim', sender:'你', text:'官方平台不能交易吗？'},
+      {id:'m4', role:'fraud', sender:'诚心买号的阿峰', text:'官方手续费高，你扫这个二维码下载担保App，客服会教你'},
+      {id:'m5', role:'fraud', sender:'诚心买号的阿峰', text:'我已经付款了，你不交保证金就报警，别浪费我时间'}
+    ],
+    flaws:[
+      {id:'f1', quote:'走我们平台有担保', type:'虚假担保', level:4, danger:'骗子指定陌生平台，所谓担保只是假页面或假客服。', advice:'只在游戏官方或公认的大型交易平台交易。'},
+      {id:'f2', quote:'先交288保证金', type:'诱导预付', level:4, danger:'正规交易不会要求卖家先交保证金。', advice:'任何让卖家先付款的担保交易都是骗局。'},
+      {id:'f3', quote:'和号款一起退给你', type:'虚假承诺', level:3, danger:'用退款承诺降低戒心，后续会继续要求解冻费。', advice:'不要相信先收费后退款的交易规则。'},
+      {id:'f4', quote:'扫这个二维码下载担保App', type:'诱导扫码下载', level:4, danger:'二维码可能指向仿冒App，窃取账号或支付信息。', advice:'不扫陌生码，不下载对方指定的交易App。'},
+      {id:'f5', quote:'不交保证金就报警', type:'反向施压', level:3, danger:'用报警和催促反过来威胁卖家，让你急于证明自己。', advice:'不要被情绪带走，保存聊天记录并向官方平台举报。'}
+    ],
+    chain:[
+      ['引流接触','买家主动高价收购账号，降低你的戒心'],
+      ['建立信任','声称使用有担保的第三方平台'],
+      ['制造焦虑','平台客服催交保证金，否则交易失败'],
+      ['诱导操作','扫码下载假App，向假客服转账'],
+      ['完成收割','以解冻费、手续费继续索要，最后拉黑']
+    ],
+    debrief:'卖号也要防骗。正规平台不会让卖家先交保证金，任何陌生二维码、指定App和“退款承诺”都应停止交易。'
+  },
+  {
+    id:'C008', code:'008', title:'双倍赔付的快递理赔', en:'THE DOUBLE REFUND', scene:'快递理赔', sceneKey:'delivery', icon:'📦', difficulty:'进阶', minutes:2, threat:'高风险',
+    hook:'理赔要先开屏幕共享？',
+    background:'你接到自称快递客服的电话，对方说你的包裹丢失，可以双倍赔付，但需要你提供银行卡和短信验证码。',
+    objective:'找出 5 处假理赔信号，保护银行卡和验证码。',
+    messages:[
+      {id:'m1', role:'fraud', sender:'快递理赔客服', text:'您好，您的快递在运输中丢失，我们给您双倍赔付，非常抱歉'},
+      {id:'m2', role:'fraud', sender:'快递理赔客服', text:'请提供银行卡号和短信验证码，财务马上给您打款'},
+      {id:'m3', role:'victim', sender:'你', text:'不能在购物平台里直接理赔吗？'},
+      {id:'m4', role:'fraud', sender:'快递理赔客服', text:'平台通道维修，你先下载理赔App并开启屏幕共享，我帮你操作'},
+      {id:'m5', role:'fraud', sender:'快递理赔客服', text:'验证码5分钟内有效，超时赔付就取消了，快点'}
+    ],
+    flaws:[
+      {id:'f1', quote:'双倍赔付', type:'超额赔偿诱惑', level:2, danger:'用高于正常标准的赔偿吸引你配合。', advice:'理赔只认购物平台或官方快递客服渠道。'},
+      {id:'f2', quote:'银行卡号和短信验证码', type:'索取敏感信息', level:4, danger:'验证码是账户资金安全的最后一道防线。', advice:'任何客服索要验证码，立即停止沟通。'},
+      {id:'f3', quote:'财务马上给您打款', type:'虚假流程', level:3, danger:'用马上打款制造真实感，掩盖后续操作风险。', advice:'正规退款会原路返回，不需要你提供支付信息。'},
+      {id:'f4', quote:'下载理赔App并开启屏幕共享', type:'诱导安装与共享', level:4, danger:'屏幕共享会暴露验证码和支付页面，假App可能直接盗刷。', advice:'不安装陌生App，不与任何人共享屏幕。'},
+      {id:'f5', quote:'验证码5分钟内有效', type:'制造紧迫感', level:3, danger:'限时催促阻止你核实，诱导你快速交出验证码。', advice:'慢下来，通过官方平台查询订单和理赔进度。'}
+    ],
+    chain:[
+      ['引流接触','冒充快递客服，准确说出物流信息'],
+      ['建立信任','主动提出双倍赔付，降低受害者戒心'],
+      ['制造焦虑','声称赔付限时，催促提供验证码'],
+      ['诱导操作','要求银行卡、验证码、下载App和共享屏幕'],
+      ['完成收割','盗刷银行卡或转走账户资金']
+    ],
+    debrief:'真正的快递理赔不会索要验证码，也不会让你下载陌生App或共享屏幕。退款只会原路返回，不需要你提供银行卡密码。'
+  }
+];
+
+</script>
+<script>
+const $ = (selector, root=document) => root.querySelector(selector);
+const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
+const APP = $('#app');
+const FX = $('#fxLayer');
+const STORAGE_KEY = 'fraudTraceProfile.v1';
+const SCENE_ORDER = [
+  ['secondhand','二手交易'],['parttime','兼职刷单'],['impersonate','冒充身份'],['ai','熟人冒充'],
+  ['ticket','票务交易'],['loan','校园贷'],['game','游戏交易'],['delivery','快递理赔']
+];
+const SCENE_ICONS = {secondhand:'📱',parttime:'💸',impersonate:'🎓',ai:'🎙️',ticket:'🎫',loan:'☎️',game:'🎮',delivery:'📦'};
+const app = {
+  currentCase:null,
+  game:null,
+  lastResult:null,
+  scanData:null,
+  activeFilter:'全部',
+  briefReturn:'home',
+  resultReturn:'game',
+  profile:null,
+  audioCtx:null
+};
+
+const defaultProfile = () => ({mastery:{},records:{},history:[],settings:{sound:true}});
+function loadProfile(){
+  try{
+    const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    const merged = {...defaultProfile(),...(value || {})};
+    merged.mastery = merged.mastery || {};
+    merged.records = merged.records || {};
+    merged.history = Array.isArray(merged.history) ? merged.history : [];
+    merged.settings = {...defaultProfile().settings,...(merged.settings || {})};
+    return merged;
+  }catch(error){return defaultProfile();}
+}
+function saveProfile(){
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(app.profile));}catch(error){}
+}
+function escapeHTML(value){
+  return String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]));
+}
+function formatTime(seconds){
+  const safe = Math.max(0, Math.floor(seconds));
+  return `${String(Math.floor(safe/60)).padStart(2,'0')}:${String(safe%60).padStart(2,'0')}`;
+}
+function getCase(id){return CASES.find(item=>item.id===id);}
+function getRecord(id){return app.profile.records[id] || null;}
+function getSceneLabel(key){const found = SCENE_ORDER.find(item=>item[0]===key);return found ? found[1] : '自定义案例';}
+function getCaseIndex(id){return CASES.findIndex(item=>item.id===id);}
+function switchScreen(name, options={}){
+  const target = document.getElementById(`${name}Screen`);
+  if(!target) return;
+  $$('.screen').forEach(screen=>{
+    if(screen!==target) screen.classList.remove('is-active','is-leaving');
+  });
+  if(options.instant){target.classList.add('is-active');}
+  else{
+    requestAnimationFrame(()=>{
+      target.classList.add('is-active');
+      target.scrollTop = 0;
+    });
+  }
+  if(name==='profile') renderProfile();
+  if(name==='library') renderLibrary();
+}
+function showToast(message, duration=1800){
+  const toast = $('#toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(()=>toast.classList.remove('show'),duration);
+}
+function playTone(kind='tap'){
+  const settings = app.profile?.settings || {sound:true};
+  if(!settings.sound) return;
+  try{
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if(!AudioContext) return;
+    if(!app.audioCtx) app.audioCtx = new AudioContext();
+    const ctx = app.audioCtx;
+    if(ctx.state==='suspended') ctx.resume();
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const frequencies = {tap:420,hit:760,miss:180,open:520,finish:920};
+    osc.type = kind==='miss' ? 'sawtooth' : 'sine';
+    osc.frequency.setValueAtTime(frequencies[kind] || 420,now);
+    if(kind==='hit') osc.frequency.exponentialRampToValueAtTime(1040,now+.12);
+    if(kind==='finish') osc.frequency.exponentialRampToValueAtTime(1320,now+.25);
+    gain.gain.setValueAtTime(.0001,now);
+    gain.gain.exponentialRampToValueAtTime(kind==='miss' ? .035 : .05,now+.015);
+    gain.gain.exponentialRampToValueAtTime(.0001,now+(kind==='finish'?.3:.14));
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.start(now);osc.stop(now+(kind==='finish'?.32:.16));
+  }catch(error){}
+}
+function haptic(pattern=[8]){try{navigator.vibrate?.(pattern);}catch(error){}}
+function spawnSpark(x,y,color='#f2b15d'){
+  const rect = APP.getBoundingClientRect();
+  for(let i=0;i<10;i++){
+    const spark = document.createElement('i');
+    spark.className='spark';
+    spark.style.left = `${x-rect.left}px`;
+    spark.style.top = `${y-rect.top}px`;
+    spark.style.background=color;
+    const angle = (Math.PI*2*i/10)+(Math.random()*.5);
+    const distance = 24+Math.random()*36;
+    spark.style.setProperty('--dx',`${Math.cos(angle)*distance}px`);
+    spark.style.setProperty('--dy',`${Math.sin(angle)*distance}px`);
+    FX.appendChild(spark);
+    setTimeout(()=>spark.remove(),850);
+  }
+}
+function launchConfetti(){
+  const colors=['#f2b15d','#ff6b5f','#65e5b2','#6bb9ee','#ede1ca'];
+  for(let i=0;i<38;i++){
+    const piece=document.createElement('i');
+    piece.className='confetti';
+    piece.style.left=`${Math.random()*100}%`;
+    piece.style.top='-16px';
+    piece.style.background=colors[i%colors.length];
+    piece.style.animationDelay=`${Math.random()*.55}s`;
+    piece.style.setProperty('--dx',`${(Math.random()-.5)*180}px`);
+    FX.appendChild(piece);
+    setTimeout(()=>piece.remove(),2500);
+  }
+}
+function showConfirm(title,copy,onOk,okText='确认'){
+  $('#confirmTitle').textContent=title;
+  $('#confirmCopy').textContent=copy;
+  $('#confirmOk').textContent=okText;
+  showConfirm.callback=onOk;
+  $('#confirmModal').classList.remove('hidden');
+  playTone('open');
+}
+function closeConfirm(){ $('#confirmModal').classList.add('hidden'); }
+function updateSoundUI(){
+  const enabled=app.profile.settings.sound;
+  $('#soundIcon').textContent=enabled?'◉':'○';
+  $('#soundBtn').setAttribute('aria-label',enabled?'关闭音效':'开启音效');
+}
+function openHome(){
+  renderHomeCases();
+  switchScreen('home');
+}
+function renderHomeCases(){
+  const list=$('#homeCaseList');
+  list.innerHTML='';
+  CASES.slice(0,6).forEach((item,index)=>{
+    const record=getRecord(item.id);
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='mini-case';
+    button.dataset.caseId=item.id;
+    button.dataset.code=item.code;
+    button.style.animation=`fade-up .42s ${index*.045}s both`;
+    button.innerHTML = `<div class='mini-icon'>${item.icon}</div><p>${escapeHTML(item.scene)} · ${escapeHTML(item.difficulty)}</p><h3>${escapeHTML(item.title)}</h3><div class='mini-foot'><span>${item.flaws.length} 处破绽</span><b>开始勘察 →</b></div>${record?`<span class='completion-mark'>${escapeHTML(record.grade)}</span>`:''}`;
+    list.appendChild(button);
+  });
+}
+function renderFeature(){
+  const day=new Date().getDate();
+  const feature=CASES[day % CASES.length];
+  app.featureCase=feature;
+  $('#featureCode').textContent=`CASE ${feature.code}`;
+  $('#featureIcon').textContent=feature.icon;
+  $('#featureScene').textContent=`${feature.scene} · ${feature.threat}`;
+  $('#featureTitle').textContent=feature.title;
+  $('#featureHook').textContent=feature.hook;
+  $('#featureFlaws').textContent=String(feature.flaws.length);
+  $('#featureDifficulty').textContent=feature.difficulty;
+  $('#featureTime').textContent=`≈${feature.minutes} min`;
+}
+function renderFilters(){
+  const bar=$('#filterBar');
+  const filters=['全部',...SCENE_ORDER.map(item=>item[1])];
+  bar.innerHTML='';
+  filters.forEach(label=>{
+    const button=document.createElement('button');
+    button.type='button';
+    button.className=`filter-pill${app.activeFilter===label?' is-active':''}`;
+    button.dataset.filter=label;
+    button.textContent=label;
+    bar.appendChild(button);
+  });
+}
+function renderLibrary(){
+  renderFilters();
+  const grid=$('#caseGrid');
+  grid.innerHTML='';
+  const filtered=app.activeFilter==='全部'?CASES:CASES.filter(item=>item.scene===app.activeFilter);
+  $('#archiveCount').textContent=String(filtered.length).padStart(2,'0');
+  if(!filtered.length){grid.innerHTML='<div class="empty-profile">没有找到相关案件</div>';return;}
+  filtered.forEach((item,index)=>{
+    const record=getRecord(item.id);
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='case-tile';
+    button.dataset.caseId=item.id;
+    button.dataset.code=item.code;
+    button.style.animationDelay=`${index*.045}s`;
+    button.innerHTML=`<div class='tile-icon'>${item.icon}</div><p class='tile-scene'>${escapeHTML(item.scene)}</p><h3>${escapeHTML(item.title)}</h3><div class='tile-bottom'><span class='difficulty ${escapeHTML(item.difficulty)}'>${escapeHTML(item.difficulty)}</span><span>${item.flaws.length} 处破绽</span></div>${record?`<span class='tile-grade'>${escapeHTML(record.grade)}</span>`:''}`;
+    grid.appendChild(button);
+  });
+}
+function openBrief(caseId, returnTo='home'){
+  const caseData=getCase(caseId);
+  if(!caseData) return;
+  app.currentCase=caseData;
+  app.briefReturn=returnTo;
+  const record=getRecord(caseData.id);
+  $('#briefCode').textContent=`CASE ${caseData.code}`;
+  $('#briefThreat').textContent=caseData.threat;
+  $('#briefIcon').textContent=caseData.icon;
+  $('#briefEn').textContent=caseData.en;
+  $('#briefTitle').textContent=caseData.title;
+  $('#briefScene').textContent=caseData.scene;
+  $('#briefDifficulty').textContent=caseData.difficulty;
+  $('#briefTime').textContent=`≈${caseData.minutes} MIN`;
+  $('#briefStamp').textContent=record ? record.grade : '待侦破';
+  $('#briefBackground').textContent=caseData.background;
+  $('#briefObjective').textContent=caseData.objective;
+  $('#briefFlawCount').textContent=String(caseData.flaws.length);
+  $('#briefCredit').textContent='100';
+  switchScreen('brief');
+  playTone('open');
+}
+function openProfile(){
+  renderProfile();
+  switchScreen('profile');
+}
+
+function startGame(){
+  const caseData=app.currentCase;
+  clearInterval(app.game?.timerId);
+  const game={
+    caseData,
+    found:new Set(),
+    foundOrder:[],
+    wrongSegments:new Set(),
+    wrongAttempts:0,
+    hintUsed:0,
+    hintIndex:0,
+    elapsed:0,
+    startTime:Date.now(),
+    submitted:false,
+    timerId:null,
+    segments:[]
+  };
+  app.game=game;
+  $('#gameCaseCode').textContent=`CASE ${caseData.code}`;
+  $('#gameCaseTitle').textContent=caseData.title;
+  $('#gameContext').textContent=caseData.background;
+  $('#evidenceCount').textContent='0';
+  $('#evidenceTotal').textContent=String(caseData.flaws.length);
+  $('#evidenceBar').style.width='0%';
+  $('#submitLabel').textContent=`还差 ${caseData.flaws.length} 处`;
+  $('#hintBanner').classList.add('hidden');
+  renderTranscript();
+  updateGameStatus();
+  startTimer();
+  switchScreen('game');
+  playTone('open');
+}
+function startTimer(){
+  const timer=$('#timerValue');
+  const box=timer.closest('.timer-box');
+  clearInterval(app.game.timerId);
+  timer.textContent='00:00';
+  box.classList.remove('is-urgent');
+  app.game.timerId=setInterval(()=>{
+    if(!app.game || app.game.submitted) return;
+    app.game.elapsed=Math.floor((Date.now()-app.game.startTime)/1000);
+    timer.textContent=formatTime(app.game.elapsed);
+    box.classList.toggle('is-urgent',app.game.elapsed>=300);
+  },1000);
+}
+function buildSegments(message,caseData){
+  const ranges=[];
+  caseData.flaws.forEach(flaw=>{
+    const start=message.text.indexOf(flaw.quote);
+    if(start>=0) ranges.push({start,end:start+flaw.quote.length,flawId:flaw.id,quote:flaw.quote});
+  });
+  ranges.sort((a,b)=>a.start-b.start || b.end-a.end);
+  const filtered=[];
+  let lastEnd=-1;
+  ranges.forEach(range=>{
+    if(range.start>=lastEnd){filtered.push(range);lastEnd=range.end;}
+  });
+  const segments=[];
+  let cursor=0;
+  const addPlain=(start,end)=>{
+    if(start>=end) return;
+    const text=message.text.slice(start,end);
+    const regex=/[^，。！？；：,.!?;:]+[，。！？；：,.!?;:]*/g;
+    let match, local=0;
+    while((match=regex.exec(text))!==null){
+      const part=match[0];
+      const segStart=start+local;
+      const segEnd=segStart+part.length;
+      segments.push({start:segStart,end:segEnd,text:part,flawId:null});
+      local+=part.length;
+    }
+    if(local<text.length){
+      segments.push({start:start+local,end,text:text.slice(local),flawId:null});
+    }
+  };
+  filtered.forEach(range=>{
+    addPlain(cursor,range.start);
+    segments.push({start:range.start,end:range.end,text:range.quote,flawId:range.flawId});
+    cursor=range.end;
+  });
+  addPlain(cursor,message.text.length);
+  return segments.map((segment,index)=>({...segment,id:`${message.id}_${segment.start}_${index}`}));
+}
+function renderTranscript(){
+  const container=$('#transcript');
+  container.innerHTML='';
+  const caseData=app.game.caseData;
+  app.game.segments=[];
+  caseData.messages.forEach((message,messageIndex)=>{
+    const row=document.createElement('div');
+    row.className=`message ${message.role}`;
+    row.style.animationDelay=`${messageIndex*.075}s`;
+    const avatar=document.createElement('div');
+    avatar.className='msg-avatar';
+    avatar.textContent=message.role==='fraud'?(message.type==='voice'?'🎙':'诈'):'我';
+    const wrap=document.createElement('div');
+    wrap.className='msg-wrap';
+    const sender=document.createElement('p');
+    sender.className='msg-sender';
+    sender.textContent=message.sender;
+    const bubble=document.createElement('div');
+    bubble.className='msg-bubble';
+    if(message.type==='voice'){
+      const line=document.createElement('div');
+      line.className='voice-line';
+      const wave=document.createElement('span');
+      wave.className='voice-wave';
+      wave.textContent='▂▅▇▃▆▂';
+      const duration=document.createElement('span');
+      duration.className='voice-duration';
+      duration.textContent='00:08';
+      line.append(wave,duration);
+      bubble.appendChild(line);
+    }
+    const textHost=document.createElement('div');
+    const segments=buildSegments(message,caseData);
+    segments.forEach(segment=>{
+      const span=document.createElement('span');
+      span.className='segment';
+      span.dataset.segmentId=segment.id;
+      span.textContent=segment.text;
+      span.setAttribute('role','button');
+      span.setAttribute('tabindex','0');
+      span.setAttribute('aria-label',`标记可疑文字：${segment.text}`);
+      span.addEventListener('click',event=>handleSegmentClick(segment,event));
+      span.addEventListener('keydown',event=>{
+        if(event.key==='Enter'||event.key===' '){event.preventDefault();handleSegmentClick(segment,event);}
+      });
+      textHost.appendChild(span);
+      app.game.segments.push({...segment,element:span,messageId:message.id});
+    });
+    bubble.appendChild(textHost);
+    wrap.append(sender,bubble);
+    row.append(avatar,wrap);
+    container.appendChild(row);
+  });
+}
+function handleSegmentClick(segment,event){
+  const game=app.game;
+  if(!game || game.submitted) return;
+  const element=event.currentTarget;
+  if(segment.flawId && game.found.has(segment.flawId)){
+    showToast('这处证据已经收入档案');
+    return;
+  }
+  if(game.wrongSegments.has(segment.id)){
+    showToast('这句已经判断过，不是关键破绽');
+    return;
+  }
+  if(segment.flawId){
+    game.found.add(segment.flawId);
+    game.foundOrder.push(segment.flawId);
+    element.classList.add('is-hit');
+    element.classList.add('is-locked');
+    const flaw=game.caseData.flaws.find(item=>item.id===segment.flawId);
+    showToast(`证据锁定：${flaw.type}`,1400);
+    playTone('hit');
+    haptic([12,20,12]);
+    spawnSpark(event.clientX,event.clientY,'#f2b15d');
+    updateGameStatus();
+    if(game.found.size===game.caseData.flaws.length){
+      setTimeout(()=>showToast('证据链完整，可以提交研判',2200),500);
+    }
+  }else{
+    game.wrongSegments.add(segment.id);
+    game.wrongAttempts+=1;
+    element.classList.add('is-wrong');
+    setTimeout(()=>element.classList.remove('is-wrong'),1300);
+    showToast('这句不是关键破绽，再找找具体操作',1700);
+    playTone('miss');
+    haptic([18]);
+    updateGameStatus();
+  }
+}
+function updateGameStatus(){
+  if(!app.game) return;
+  const total=app.game.caseData.flaws.length;
+  const found=app.game.found.size;
+  const remaining=total-found;
+  $('#evidenceCount').textContent=String(found);
+  $('#evidenceBar').style.width=`${total?found/total*100:0}%`;
+  $('#submitLabel').textContent=remaining?`还差 ${remaining} 处`:'证据链完整';
+}
+function showHint(){
+  const game=app.game;
+  if(!game) return;
+  const missing=game.caseData.flaws.filter(flaw=>!game.found.has(flaw.id));
+  if(!missing.length){showToast('所有破绽都找到了，直接提交吧');return;}
+  if(game.hintUsed>=2){showToast('本局提示次数已用完');return;}
+  const flaw=missing[game.hintIndex%missing.length];
+  game.hintIndex+=1;
+  game.hintUsed+=1;
+  $('#hintText').textContent=`方向：这处异常与“${flaw.type}”有关。别直接找答案，先看对方想让你做什么。`;
+  $('#hintBanner').classList.remove('hidden');
+  playTone('open');
+  haptic([8]);
+}
+function requestSubmit(){
+  const game=app.game;
+  if(!game || game.submitted) return;
+  const remaining=game.caseData.flaws.length-game.found.size;
+  if(remaining>0){
+    showConfirm('还有线索没锁定',`目前还差 ${remaining} 处破绽。现在提交会按当前准确率结算，你确定吗？`,finishGame,'仍然提交');
+  }else{
+    finishGame();
+  }
+}
+function getGrade(accuracy,found,total,wrong){
+  if(found===total && wrong===0) return 'S';
+  if(accuracy>=.8) return 'A';
+  if(accuracy>=.6) return 'B';
+  return 'C';
+}
+function finishGame(){
+  closeConfirm();
+  const game=app.game;
+  if(!game || game.submitted) return;
+  game.submitted=true;
+  clearInterval(game.timerId);
+  game.elapsed=Math.max(game.elapsed,Math.floor((Date.now()-game.startTime)/1000));
+  const total=game.caseData.flaws.length;
+  const found=game.found.size;
+  const accuracy=total?found/total:0;
+  const grade=getGrade(accuracy,found,total,game.wrongAttempts);
+  const timeMultiplier=game.elapsed<180?1.2:game.elapsed>300?.9:1;
+  const baseScore=Math.max(0,found*10-game.wrongAttempts*3-game.hintUsed*5);
+  const score=Math.round(baseScore*timeMultiplier);
+  const missedFlaws=game.caseData.flaws.filter(flaw=>!game.found.has(flaw.id));
+  const foundFlaws=game.caseData.flaws.filter(flaw=>game.found.has(flaw.id));
+  const result={caseData:game.caseData,found,total,wrong:game.wrongAttempts,hintUsed:game.hintUsed,elapsed:game.elapsed,accuracy,grade,score,missedFlaws,foundFlaws,date:new Date().toISOString()};
+  app.lastResult=result;
+  updateProfileWithResult(result);
+  renderResult(result);
+  switchScreen('result');
+  playTone('finish');
+  if(grade==='S'){setTimeout(launchConfetti,300);haptic([20,40,20,40,60]);}
+}
+function updateProfileWithResult(result){
+  const id=result.caseData.id;
+  const record=getRecord(id);
+  if(!record || result.accuracy>record.accuracy || (result.accuracy===record.accuracy && result.score>record.score)){
+    app.profile.records[id]={accuracy:result.accuracy,grade:result.grade,score:result.score,date:result.date};
+  }
+  const key=result.caseData.sceneKey;
+  app.profile.mastery[key]=Math.max(app.profile.mastery[key] || 0,Math.round(result.accuracy*100));
+  app.profile.history.unshift({id,title:result.caseData.title,accuracy:result.accuracy,grade:result.grade,score:result.score,date:result.date,elapsed:result.elapsed,found:result.found,total:result.total,wrong:result.wrong,sceneKey:key});
+  app.profile.history=app.profile.history.slice(0,20);
+  saveProfile();
+}
+function renderResult(result){
+  const meta={
+    S:['完美溯源','每一处破绽都被你锁定了。骗子这次没有留下任何可乘之机。','证据链完整'],
+    A:['敏锐的观察者','你抓住了大部分关键破绽，再补上遗漏的细节就更稳了。','证据链完整'],
+    B:['线索捕手','你已经看见主要套路，但还有几处话术藏在细节里。','基本还原'],
+    C:['需要二次勘察','这次漏掉了较多关键信号，认真看完复盘会提升很快。','线索有缺口']
+  }[result.grade];
+  $('#gradeLetter').textContent=result.grade;
+  $('#gradeStamp').textContent=meta[2];
+  $('#gradeTitle').textContent=meta[0];
+  $('#gradeSubtitle').textContent=meta[1];
+  $('#resultHits').textContent=`${result.found}/${result.total}`;
+  $('#resultMisses').textContent=String(result.wrong);
+  $('#resultTime').textContent=formatTime(result.elapsed);
+  $('#resultScore').textContent='0';
+  animateNumber($('#resultScore'),result.score,620);
+  const chain=$('#resultChain');
+  chain.innerHTML='';
+  result.caseData.chain.forEach(([label])=>{
+    const node=document.createElement('div');
+    node.className='chain-node';
+    const span=document.createElement('span');
+    span.textContent=label;
+    node.appendChild(span);
+    chain.appendChild(node);
+  });
+  $('#chainSteps').textContent=`${result.caseData.chain.length} STEPS`;
+  $('#viewReportBtn').dataset.caseId=result.caseData.id;
+}
+function animateNumber(element,target,duration=500){
+  const start=performance.now();
+  const from=0;
+  const step=now=>{
+    const progress=Math.min(1,(now-start)/duration);
+    const eased=1-Math.pow(1-progress,3);
+    element.textContent=String(Math.round(from+(target-from)*eased));
+    if(progress<1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+function openNextCase(){
+  const current=app.currentCase || app.lastResult?.caseData;
+  if(!current) return openHome();
+  const index=getCaseIndex(current.id);
+  const next=CASES[(index+1+CASES.length)%CASES.length];
+  openBrief(next.id,'result');
+}
+
+function openReport(){
+  if(!app.lastResult) return openHome();
+  renderReport(app.lastResult);
+  switchScreen('report');
+  playTone('open');
+}
+function renderReport(result){
+  const caseData=result.caseData;
+  $('#reportCode').textContent=`CASE ${caseData.code}`;
+  $('#reportTitle').textContent=caseData.title;
+  $('#reportDebrief').textContent=caseData.debrief;
+  $('#evidenceSummary').textContent=`${result.found} / ${result.total}`;
+  const map=$('#traceMap');
+  map.innerHTML='';
+  caseData.chain.forEach(([label,text],index)=>{
+    const item=document.createElement('div');
+    item.className='trace-item';
+    item.style.animationDelay=`${index*.06}s`;
+    const title=document.createElement('span');
+    title.textContent=String(index+1).padStart(2,'0')+' · '+label;
+    const copy=document.createElement('p');
+    copy.textContent=text;
+    item.append(title,copy);
+    map.appendChild(item);
+  });
+  const list=$('#flawList');
+  list.innerHTML='';
+  caseData.flaws.forEach((flaw,index)=>{
+    const found=result.foundFlaws.some(item=>item.id===flaw.id);
+    const card=document.createElement('article');
+    card.className=`flaw-card${found?'':' is-missed'}${index===0?' is-open':''}`;
+    card.style.animationDelay=`${index*.035}s`;
+    const toggle=document.createElement('button');
+    toggle.type='button';
+    toggle.className='flaw-toggle';
+    toggle.innerHTML=`<span class='flaw-index'>${String(index+1).padStart(2,'0')}</span><span class='flaw-title'><b>${escapeHTML(flaw.type)} · Lv.${flaw.level}</b><span>${escapeHTML(flaw.quote)}</span></span><span class='flaw-status'>${found?'已锁定':'遗漏'}</span><i>+</i>`;
+    const detail=document.createElement('div');
+    detail.className='flaw-detail';
+    detail.innerHTML=`<p class='flaw-quote'>“${escapeHTML(flaw.quote)}”</p><p><b>危险点：</b>${escapeHTML(flaw.danger)}</p><p><b>正确应对：</b>${escapeHTML(flaw.advice)}</p>`;
+    toggle.addEventListener('click',()=>card.classList.toggle('is-open'));
+    card.append(toggle,detail);
+    list.appendChild(card);
+  });
+}
+function getRank(solved){
+  if(solved>=CASES.filter(item=>!String(item.id).startsWith('CUSTOM')).length) return ['骗局溯源专家','八类骗局全部纳入你的能力图谱'];
+  if(solved>=6) return ['资深反诈侦探','你已经能稳定识别大多数校园骗局'];
+  if(solved>=3) return ['骗术拆解师','继续补齐薄弱类型，证据链会越来越完整'];
+  if(solved>=1) return ['线索收集者','你已经完成第一次主动溯源'];
+  return ['见习观察员','从第一个案件开始建立你的防骗画像'];
+}
+function renderRadar(values){
+  const cx=160, cy=108, radius=73;
+  const points=[];
+  const labels=[];
+  const axes=SCENE_ORDER.map((item,index)=>{
+    const angle=-Math.PI/2+index*Math.PI*2/SCENE_ORDER.length;
+    const ratio=Math.max(.08,Math.min(1,(values[item[0]] || 20)/100));
+    const x=cx+Math.cos(angle)*radius*ratio;
+    const y=cy+Math.sin(angle)*radius*ratio;
+    points.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+    const lx=cx+Math.cos(angle)*(radius+28);
+    const ly=cy+Math.sin(angle)*(radius+27);
+    let anchor='middle';
+    if(Math.cos(angle)>.3) anchor='start';
+    if(Math.cos(angle)<-.3) anchor='end';
+    labels.push(`<text class='radar-label' x='${lx.toFixed(1)}' y='${(ly+2).toFixed(1)}' text-anchor='${anchor}'>${escapeHTML(item[1])}</text>`);
+  });
+  const grids=[];
+  [.25,.5,.75,1].forEach(level=>{
+    const gridPoints=SCENE_ORDER.map((_,index)=>{
+      const angle=-Math.PI/2+index*Math.PI*2/SCENE_ORDER.length;
+      return `${(cx+Math.cos(angle)*radius*level).toFixed(1)},${(cy+Math.sin(angle)*radius*level).toFixed(1)}`;
+    }).join(' ');
+    grids.push(`<polygon points='${gridPoints}' fill='none' stroke='rgba(214,231,242,.09)' stroke-width='1'/>`);
+  });
+  const axisLines=SCENE_ORDER.map((_,index)=>{
+    const angle=-Math.PI/2+index*Math.PI*2/SCENE_ORDER.length;
+    return `<line x1='${cx}' y1='${cy}' x2='${(cx+Math.cos(angle)*radius).toFixed(1)}' y2='${(cy+Math.sin(angle)*radius).toFixed(1)}' stroke='rgba(214,231,242,.07)'/>`;
+  }).join('');
+  return `<svg viewBox='0 0 320 225' role='img' aria-label='八类骗局能力雷达图'>${grids.join('')}${axisLines}<polygon class='radar-polygon' points='${points.join(' ')}' fill='rgba(242,177,93,.18)' stroke='#f2b15d' stroke-width='2'/>${labels.join('')}<circle cx='${cx}' cy='${cy}' r='2' fill='#f2b177'/></svg>`;
+}
+function renderProfile(){
+  const profile=app.profile;
+  const solved=Object.keys(profile.records).length;
+  const accuracyList=Object.values(profile.records).map(item=>item.accuracy);
+  const average=accuracyList.length?Math.round(accuracyList.reduce((sum,value)=>sum+value,0)/accuracyList.length*100):0;
+  const totalScore=Object.values(profile.records).reduce((sum,item)=>sum+(item.score||0),0);
+  const rank=getRank(solved);
+  const values={};
+  SCENE_ORDER.forEach(([key])=>{values[key]=profile.mastery[key] || 20;});
+  const rows=SCENE_ORDER.map(([key,label])=>`<div class='mastery-row'><span>${label}</span><div class='mastery-track'><i data-width='${values[key]}'></i></div><b>${values[key]}%</b></div>`).join('');
+  const history=profile.history.length?profile.history.slice(0,8).map(item=>`<div class='history-item'><span class='history-grade'>${escapeHTML(item.grade)}</span><div class='history-copy'><b>${escapeHTML(item.title)}</b><span>${new Date(item.date).toLocaleDateString('zh-CN')} · 用时 ${formatTime(item.elapsed)} · 误标 ${item.wrong}</span></div><span class='history-score'>${item.score} 分</span></div>`).join(''):`<div class='empty-profile'>还没有完成案件。<br>完成一次推理后，这里会生成你的能力画像。</div>`;
+  $('#profileContent').innerHTML=`
+    <section class='profile-rank'><p class='rank-label'>DETECTIVE RANK</p><h1>${rank[0]}</h1><p>${rank[1]}</p><div class='profile-stats'><div><strong>${solved}</strong><span>已破案件</span></div><div><strong>${average}%</strong><span>平均准确率</span></div><div><strong>${totalScore}</strong><span>累计得分</span></div></div></section>
+    <section class='radar-card'><p class='hud-label'>EIGHT SCENARIOS</p><h2>防骗能力雷达</h2><div class='radar-wrap'>${renderRadar(values)}</div><div class='mastery-list'>${rows}</div></section>
+    <section class='history-card'><p class='hud-label'>RECENT CASES</p><h2>最近记录</h2>${history}</section>
+  `;
+  requestAnimationFrame(()=>{
+    setTimeout(()=>$$('#profileContent .mastery-track i').forEach(bar=>{bar.style.width=`${bar.dataset.width}%`;}),80);
+  });
+}
+function resetProfile(){
+  showConfirm('清空能力记录？','所有案件评级、历史得分和能力画像都会被清除，且无法恢复。',()=>{
+    app.profile=defaultProfile();
+    saveProfile();
+    renderProfile();
+    renderHomeCases();
+    renderLibrary();
+    closeConfirm();
+    showToast('能力记录已清空');
+  },'确认清空');
+}
+
+const SCAN_RULES=[
+  {regex:/(私下交易|私下转账|脱离平台|平台外|只支持微信|个人账户|安全账户|转到.*卡上)/g,type:'脱离平台/异常收款',danger:'绕开平台担保或个人账户收款，转账后难以追回。',advice:'停止转账，只走官方平台或本人实名账户。'},
+  {regex:/(先转|先付|定金|保证金|垫付|解冻费|手续费|充值)/g,type:'诱导预付',danger:'先交钱才能继续交易或返利，是最常见的收割方式。',advice:'未见实物、未确认订单前，不支付任何预付款。'},
+  {regex:/(扫码|二维码|陌生App|下载.*App|屏幕共享)/g,type:'诱导扫码下载/共享',danger:'陌生二维码和App可能窃取账号、验证码或直接扣款。',advice:'不扫陌生码，不下载指定App，不共享屏幕。'},
+  {regex:/(验证码|银行卡号|身份证号|短信验证码|人脸识别)/g,type:'索取敏感信息',danger:'验证码和银行卡信息一旦泄露，账户资金可能被直接转走。',advice:'任何客服索要验证码，立即停止沟通。'},
+  {regex:/(校园贷|注销.*账户|影响征信|征信.*记录|冻结额度)/g,type:'虚构征信焦虑',danger:'用影响征信、注销账户制造恐慌，诱导转账或贷款。',advice:'征信问题只通过官方平台或征信中心核实。'},
+  {regex:/(日赚|高收益|返利|连本带利|原价出|双倍赔付|免费送)/g,type:'高收益诱惑',danger:'明显不合理的收益或赔偿，通常用来降低你的警惕。',advice:'先核实平台规则，不因低价和高收益冲动操作。'},
+  {regex:/(马上|今晚\d|5分钟|五分钟|超时|名额有限|快点|急用|立刻)/g,type:'制造紧迫感',danger:'限时和催促让你来不及核实，是被骗的重要推手。',advice:'越催越停一下，至少换一个渠道确认。'},
+  {regex:/(不要.*(问|挂断|告诉)|别告诉|不方便打电话|手机快没电|我在开会)/g,type:'阻断核实/信息隔离',danger:'阻止你联系家人、同学或官方客服，避免骗局被识破。',advice:'立即挂断，用原有联系方式或官方渠道核实。'}
+];
+const SAMPLE_SCAN='同学你好，这个号我出价1200，走我们平台有担保。\n先交288保证金，交易完成会和号款一起退给你。\n官方手续费高，你扫这个二维码下载担保App。\n5分钟内决定，不然我就卖给别人了。';
+function setScanLoading(loading){
+  const button=$('#analyzeBtn');
+  button.disabled=loading;
+  button.innerHTML=loading?'智能研判中<span>···</span>':'开始智能研判<span>⌁</span>';
+}
+function analyzeText(text){
+  const matches=[];
+  const seen=new Set();
+  SCAN_RULES.forEach(rule=>{
+    rule.regex.lastIndex=0;
+    let match;
+    while((match=rule.regex.exec(text))!==null){
+      const quote=match[0].trim();
+      const key=`${rule.type}:${quote}`;
+      if(!seen.has(key)){
+        seen.add(key);
+        matches.push({quote,type:rule.type,danger:rule.danger,advice:rule.advice,index:match.index});
+      }
+      if(match[0].length===0) break;
+    }
+  });
+  matches.sort((a,b)=>a.index-b.index);
+  const hasMoney=/(元|转账|付款|定金|保证金|账户)/.test(text);
+  const riskScore=Math.min(98,Math.round(18+matches.length*12+(hasMoney?8:0)));
+  let riskLevel='低风险',riskColor='#65e5b2';
+  if(riskScore>=70){riskLevel='极高风险';riskColor='#ff6b5f';}
+  else if(riskScore>=45){riskLevel='高风险';riskColor='#ff8f83';}
+  else if(riskScore>=25){riskLevel='中风险';riskColor='#f2b15d';}
+  return {text,matches,riskScore,riskLevel,riskColor};
+}
+function renderScanResult(data){
+  const section=$('#scanResult');
+  section.classList.remove('hidden');
+  const scoreEl=$('#riskScore');
+  scoreEl.style.color=data.riskColor;
+  scoreEl.textContent='0';
+  animateNumber(scoreEl,data.riskScore,650);
+  $('#riskLevel').textContent=data.riskLevel;
+  $('#riskLevel').style.color=data.riskColor;
+  const orbit=$('.risk-orbit');
+  orbit.style.borderColor=`${data.riskColor}55`;
+  orbit.style.setProperty('--risk-color',data.riskColor);
+  $('#riskSummary').textContent=`发现 ${data.matches.length} 处可疑信号，建议立即停止转账并通过官方渠道核实。`;
+  const list=$('#scanFlaws');
+  list.innerHTML='';
+  data.matches.slice(0,7).forEach((item,index)=>{
+    const card=document.createElement('div');
+    card.className='scan-flaw';
+    card.style.animationDelay=`${index*.045}s`;
+    card.innerHTML=`<b>${escapeHTML(item.type)}</b><p>“${escapeHTML(item.quote)}” · ${escapeHTML(item.danger)}</p>`;
+    list.appendChild(card);
+  });
+  section.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function runScan(){
+  const text=$('#scanText').value.trim();
+  if(!text){showToast('请先粘贴可疑聊天文字');return;}
+  setScanLoading(true);
+  setTimeout(()=>{
+    const data=analyzeText(text);
+    app.scanData=data;
+    renderScanResult(data);
+    setScanLoading(false);
+    $('#convertCaseBtn').disabled=data.matches.length===0;
+    playTone('finish');
+    haptic([10,20,10]);
+  },760);
+}
+function splitScanMessages(text){
+  let lines=text.split(/\n+/).map(line=>line.trim()).filter(Boolean);
+  if(lines.length===1){
+    lines=text.split(/(?<=[。！？!?；;])/).map(line=>line.trim()).filter(Boolean);
+  }
+  return lines.slice(0,10);
+}
+function convertScanToCase(){
+  const data=app.scanData;
+  if(!data || !data.matches.length){showToast('没有足够的可疑信号生成案件');return;}
+  const lines=splitScanMessages(data.text);
+  const messages=lines.map((line,index)=>{
+    const suspicious=data.matches.some(match=>line.includes(match.quote));
+    return {id:`cm${index+1}`,role:suspicious?'fraud':'victim',sender:suspicious?'可疑联系人':'你',text:line};
+  });
+  const flaws=[];
+  const seen=new Set();
+  data.matches.forEach((match,index)=>{
+    if(seen.has(match.quote)) return;
+    const message=messages.find(item=>item.text.includes(match.quote));
+    if(!message) return;
+    seen.add(match.quote);
+    flaws.push({id:`cf${flaws.length+1}`,quote:match.quote,type:match.type,level:3,danger:match.danger,advice:match.advice});
+  });
+  if(!flaws.length){showToast('这段文字无法定位具体破绽');return;}
+  const custom={
+    id:`CUSTOM_${Date.now()}`,code:'NEW',title:'截图里的可疑聊天',en:'CASE FROM YOUR SCREENSHOT',scene:'自定义案例',sceneKey:'custom',icon:'⌁',difficulty:'实战',minutes:3,threat:'待核实',
+    hook:'根据你提供的聊天生成',
+    background:'这是一段由用户提供的可疑聊天记录。请找出其中所有高风险表达，并判断对方最终想诱导你做什么。',
+    objective:`在这段聊天里找出 ${flaws.length} 处可疑话术。`,
+    messages,flaws,
+    chain:[
+      ['引流接触','可疑联系人主动提及交易或赔付'],
+      ['建立信任','使用担保、客服或真实身份包装'],
+      ['制造焦虑','通过限时、征信或名额催促决策'],
+      ['诱导操作','要求转账、扫码、提供验证码或共享屏幕'],
+      ['完成收割','资金转出后继续加码或直接失联']
+    ],
+    debrief:'这段案例来自你输入的可疑聊天。正式产品中可接入 OCR 与云端大模型，自动完成角色识别和破绽抽取；当前离线版使用本地规则研判。'
+  };
+  CASES.push(custom);
+  openBrief(custom.id,'scan');
+  showToast('推理关已生成');
+}
+function shareResult(){
+  if(!app.lastResult) return;
+  const result=app.lastResult;
+  const text=`我在《骗局溯源·反诈推理师》完成了「${result.caseData.title}」，评级 ${result.grade}，锁定 ${result.found}/${result.total} 处破绽。来试试你能不能识破？`;
+  if(navigator.share){
+    navigator.share({title:'骗局溯源·反诈推理师',text,url:/^https?:/.test(location.href)?location.href:undefined}).catch(()=>{});
+  }else if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(()=>showToast('战绩文字已复制')).catch(()=>showToast('当前环境不支持分享'));
+  }else{showToast('当前环境不支持分享');}
+}
+function bindEvents(){
+  $('#soundBtn').addEventListener('click',()=>{app.profile.settings.sound=!app.profile.settings.sound;saveProfile();updateSoundUI();if(app.profile.settings.sound)playTone('tap');});
+  $('#featureStart').addEventListener('click',()=>openBrief(app.featureCase.id,'home'));
+  $('#homeCaseList').addEventListener('click',event=>{const card=event.target.closest('[data-case-id]');if(card)openBrief(card.dataset.caseId,'home');});
+  $('#viewAllBtn').addEventListener('click',()=>{app.activeFilter='全部';switchScreen('library');});
+  $('#scanQuick').addEventListener('click',()=>switchScreen('scan'));
+  $('#profileQuick').addEventListener('click',openProfile);
+  $$('.nav-item').forEach(button=>button.addEventListener('click',()=>{
+    const nav=button.dataset.nav;
+    if(nav==='home')openHome();
+    if(nav==='library'){app.activeFilter='全部';switchScreen('library');}
+    if(nav==='profile')openProfile();
+  }));
+  $('#filterBar').addEventListener('click',event=>{const pill=event.target.closest('[data-filter]');if(!pill)return;app.activeFilter=pill.dataset.filter;renderLibrary();playTone('tap');});
+  $('#caseGrid').addEventListener('click',event=>{const card=event.target.closest('[data-case-id]');if(card)openBrief(card.dataset.caseId,'library');});
+  $('#briefBack').addEventListener('click',()=>{if(app.briefReturn==='result'||app.briefReturn==='scan')switchScreen(app.briefReturn);else switchScreen('library');});
+  $('#startCaseBtn').addEventListener('click',startGame);
+  $('#gameExit').addEventListener('click',()=>{
+    if(!app.game || app.game.submitted){openHome();return;}
+    showConfirm('退出本局？','当前找到的证据不会保存，退出后需要重新勘察。',()=>{clearInterval(app.game.timerId);closeConfirm();switchScreen('brief');},'确认退出');
+  });
+  $('#hintBtn').addEventListener('click',showHint);
+  $('#hintClose').addEventListener('click',()=>$('#hintBanner').classList.add('hidden'));
+  $('#submitBtn').addEventListener('click',requestSubmit);
+  $('#resultBackHome').addEventListener('click',openHome);
+  $('#resultShare').addEventListener('click',shareResult);
+  $('#viewReportBtn').addEventListener('click',openReport);
+  $('#nextCaseBtn').addEventListener('click',openNextCase);
+  $('#reportBack').addEventListener('click',()=>switchScreen('result'));
+  $('#reportProfile').addEventListener('click',openProfile);
+  $('#reportNextBtn').addEventListener('click',openNextCase);
+  $('#profileBack').addEventListener('click',openHome);
+  $('#profileReset').addEventListener('click',resetProfile);
+  $('#scanBack').addEventListener('click',openHome);
+  $('#scanText').addEventListener('input',()=>{$('#scanCharCount').textContent=`${$('#scanText').value.length} 字`;});
+  $('#sampleScanBtn').addEventListener('click',()=>{$('#scanText').value=SAMPLE_SCAN;$('#scanText').dispatchEvent(new Event('input'));showToast('示例已载入');playTone('tap');});
+  $('#analyzeBtn').addEventListener('click',runScan);
+  $('#convertCaseBtn').addEventListener('click',convertScanToCase);
+  $('#screenshotInput').addEventListener('change',event=>{
+    const file=event.target.files?.[0];
+    if(!file) return;
+    const preview=$('#uploadPreview');
+    preview.src=URL.createObjectURL(file);
+    preview.hidden=false;
+    $('.upload-visual').hidden=true;
+    showToast('截图已载入，请粘贴图中文字进行离线研判');
+  });
+  $('#confirmCancel').addEventListener('click',closeConfirm);
+  $('#confirmOk').addEventListener('click',()=>{if(showConfirm.callback)showConfirm.callback();});
+  $('#confirmModal').addEventListener('click',event=>{if(event.target.id==='confirmModal')closeConfirm();});
+  $('#sheetBackdrop').addEventListener('click',event=>{if(event.target.id==='sheetBackdrop')$('#sheetBackdrop').classList.add('hidden');});
+  $('#sheetAction').addEventListener('click',()=>$('#sheetBackdrop').classList.add('hidden'));
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'){closeConfirm();$('#sheetBackdrop').classList.add('hidden');}});
+}
+function init(){
+  app.profile=loadProfile();
+  renderFeature();
+  renderHomeCases();
+  renderFilters();
+  renderLibrary();
+  updateSoundUI();
+  bindEvents();
+  switchScreen('home',{instant:true});
+}
+init();
+
+
+</script>
+</body>
+</html>
+
